@@ -4,5 +4,8 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.CrudDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.SuperDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.User;
 
-public interface UserDAO extends CrudDAO<User> {
+public interface UserDAO extends CrudDAO<User, Long> {
+
+    User findByUsername(String username) throws Exception;
+    boolean existsByUsername(String username) throws Exception;
 }
