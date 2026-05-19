@@ -26,7 +26,7 @@
 
                 <HBox alignment="CENTER_LEFT" prefHeight="45.0" spacing="15.0" styleClass="filter-bar">
                     <children>
-                        <HBox alignment="CENTER_LEFT" maxWidth="450.0" spacing="10.0" styleClass="search-box" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" maxWidth="979.0" prefHeight="46.0" prefWidth="979.0" spacing="10.0" styleClass="search-box" HBox.hgrow="ALWAYS">
                             <children>
                                 <FontIcon iconColor="#64748B" iconLiteral="fas-search" iconSize="14" />
                                 <TextField fx:id="txtSearchSessions" onKeyReleased="#txtSearchSessionsOnKeyReleased" prefHeight="35.0" promptText="Search scheduled sessions by patient or therapist name..." styleClass="text-field-raw" HBox.hgrow="ALWAYS" />

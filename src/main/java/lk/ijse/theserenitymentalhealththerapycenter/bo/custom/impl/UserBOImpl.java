@@ -77,6 +77,7 @@ public class UserBOImpl implements UserBO {
 
             User user = userDAO.findByUsername(username);
 
+            // ✅ FIXED: Using specialized LoginException over general registration errors
             if (user == null) {
                 throw new LoginException("Login failed: Invalid credentials.");
             }
@@ -108,7 +109,7 @@ public class UserBOImpl implements UserBO {
 
             User user = userDAO.findById(dto.getId());
             if (user == null || user.getStatus() == CommonStatus.INACTIVE) {
-                throw new RegistrationException("Update failed: User profile not found.");
+                throw new LoginException("Update failed: Active user profile context not found.");
             }
 
             user.setFullName(dto.getFullName());
@@ -149,7 +150,6 @@ public class UserBOImpl implements UserBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Wrapped inside an active read transaction to clear context validity checks
             transaction = session.beginTransaction();
 
             List<User> users = userDAO.findAll();

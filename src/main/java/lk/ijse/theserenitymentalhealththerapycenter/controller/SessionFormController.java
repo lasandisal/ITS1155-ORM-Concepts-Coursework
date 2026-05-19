@@ -214,7 +214,6 @@ public class SessionFormController {
 
             btnBook.setText("Reschedule Session");
 
-            // ✅ ADDED: Double-click launches the modal summary card view
             if (event.getClickCount() == 2) {
                 openSessionDetailCard(selectedSession);
             }
@@ -225,7 +224,6 @@ public class SessionFormController {
     void txtSearchSessionsOnKeyReleased(KeyEvent event) {
         String query = txtSearchSessions.getText().trim().toLowerCase();
 
-        // ✅ ADDED: Capture KeyCode.ENTER to load top matching record into separate modal card view
         if (event.getCode() == KeyCode.ENTER && !tblSessions.getItems().isEmpty()) {
             TherapySessionDTO topMatchedSession = tblSessions.getItems().get(0);
             openSessionDetailCard(topMatchedSession);

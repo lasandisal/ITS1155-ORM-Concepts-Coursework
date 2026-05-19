@@ -25,10 +25,10 @@
 
                 <HBox alignment="CENTER_LEFT" prefHeight="45.0" spacing="15.0" styleClass="filter-bar">
                     <children>
-                        <HBox alignment="CENTER_LEFT" maxWidth="450.0" spacing="10.0" styleClass="search-box" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" maxWidth="990.0" prefHeight="46.0" prefWidth="990.0" spacing="10.0" styleClass="search-box" HBox.hgrow="ALWAYS">
                             <children>
                                 <FontIcon iconColor="#64748B" iconLiteral="fas-search" iconSize="14" />
-                                <TextField fx:id="txtSearchProgram" onKeyReleased="#txtSearchProgramOnKeyReleased" prefHeight="35.0" promptText="Filter patient records by active Therapy Program ID..." styleClass="text-field-raw" HBox.hgrow="ALWAYS" />
+                                <TextField fx:id="txtSearchProgram" onKeyReleased="#txtSearchProgramOnKeyReleased" prefHeight="37.0" prefWidth="500.0" promptText="Filter patient records by active Therapy Program ID..." styleClass="text-field-raw" HBox.hgrow="ALWAYS" />
                             </children>
                             <padding><Insets left="12.0" right="12.0" /></padding>
                         </HBox>

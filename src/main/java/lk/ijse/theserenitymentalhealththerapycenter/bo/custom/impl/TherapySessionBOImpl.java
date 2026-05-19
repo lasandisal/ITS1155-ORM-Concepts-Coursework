@@ -11,7 +11,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapySessionDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession;
-import lk.ijse.theserenitymentalhealththerapycenter.exception.RegistrationException;
+import lk.ijse.theserenitymentalhealththerapycenter.exception.SessionScheduleException;
 import lk.ijse.theserenitymentalhealththerapycenter.util.MappingUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -28,7 +28,7 @@ public class TherapySessionBOImpl implements TherapySessionBO {
     public boolean bookSession(TherapySessionDTO dto) throws Exception {
         if (dto.getPatientId() == null || dto.getTherapistId() == null ||
                 dto.getProgramId() == null || dto.getSessionDateTime() == null) {
-            throw new RegistrationException("Booking Failed: Complete session scheduling details must be supplied.");
+            throw new SessionScheduleException("Booking Failed: Complete session scheduling details must be supplied.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
@@ -37,10 +37,10 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         try {
             transaction = session.beginTransaction();
 
-            // Inter-DAO validation runs within the same active thread session beautifully
             boolean isAvailable = therapistDAO.isTherapistAvailable(dto.getTherapistId(), dto.getSessionDateTime());
+            // ✅ FIXED: Using specialized SessionScheduleException for resource Clashes
             if (!isAvailable) {
-                throw new RegistrationException("Booking Failed: Selected Therapist is already booked for this specific time slot.");
+                throw new SessionScheduleException("Booking Failed: Selected Therapist is already booked for this specific time slot.");
             }
 
             TherapySession therapySession = MappingUtil.toTherapySessionEntity(dto);
@@ -60,7 +60,7 @@ public class TherapySessionBOImpl implements TherapySessionBO {
     @Override
     public boolean rescheduleSession(TherapySessionDTO dto) throws Exception {
         if (dto.getId() == null || dto.getTherapistId() == null || dto.getSessionDateTime() == null) {
-            throw new RegistrationException("Reschedule Failed: Missing identification parameters.");
+            throw new SessionScheduleException("Reschedule Failed: Missing identification parameters.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
@@ -71,12 +71,12 @@ public class TherapySessionBOImpl implements TherapySessionBO {
 
             TherapySession activeSession = sessionDAO.findById(dto.getId());
             if (activeSession == null || activeSession.getStatus() == TherapySession.Status.CANCELLED) {
-                throw new RegistrationException("Reschedule Failed: Active appointment record not found.");
+                throw new SessionScheduleException("Reschedule Failed: Active appointment record not found.");
             }
 
             boolean isAvailable = therapistDAO.isTherapistAvailable(dto.getTherapistId(), dto.getSessionDateTime());
             if (!isAvailable) {
-                throw new RegistrationException("Reschedule Failed: The selected practitioner is unavailable at the new requested time.");
+                throw new SessionScheduleException("Reschedule Failed: The selected practitioner is unavailable at the new requested time.");
             }
 
             activeSession.setSessionDateTime(dto.getSessionDateTime());
@@ -115,7 +115,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Wrapped inside read transaction to clear 'createQuery' validity rules
             transaction = session.beginTransaction();
 
             List<TherapySession> sessions = sessionDAO.findAllSessionsWithDetails();
@@ -138,7 +137,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Wrapped complex criteria queries in a safe read transaction wrapper context
             transaction = session.beginTransaction();
 
             List<Patient> patients = sessionDAO.findPatientsEnrolledInAllPrograms();

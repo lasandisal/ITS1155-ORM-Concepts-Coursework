@@ -7,7 +7,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOType;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
-import lk.ijse.theserenitymentalhealththerapycenter.exception.RegistrationException;
+import lk.ijse.theserenitymentalhealththerapycenter.exception.PaymentException;
 import lk.ijse.theserenitymentalhealththerapycenter.util.MappingUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.ValidationUtil;
 import org.hibernate.Session;
@@ -18,18 +18,17 @@ import java.util.List;
 
 public class PaymentBOImpl implements PaymentBO {
 
-    // ✅ FIXED: Corrected the DAO type mapping from PATIENT to PAYMENT and stripped the double semicolon
     private final PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOType.PAYMENT);
 
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
         if (dto.getPatientId() == null || dto.getProgramId() == null ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getInvoiceNumber()) || dto.getPaymentDate() == null) {
-            throw new RegistrationException("Payment Failed: Incomplete processing parameters supplied.");
+            throw new PaymentException("Payment Failed: Incomplete processing parameters supplied.");
         }
 
         if (dto.getAmount() <= 0) {
-            throw new RegistrationException("Payment Failed: The collected ledger processing amount must be greater than zero.");
+            throw new PaymentException("Payment Failed: The collected ledger processing amount must be greater than zero.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
@@ -39,8 +38,9 @@ public class PaymentBOImpl implements PaymentBO {
             transaction = session.beginTransaction();
 
             Payment existingInvoice = paymentDAO.findByInvoiceNumber(dto.getInvoiceNumber());
+            // ✅ FIXED: Using specialized PaymentException over registration formats
             if (existingInvoice != null) {
-                throw new RegistrationException("Payment Failed: Invoice ID tracking serial '" + dto.getInvoiceNumber() + "' is already assigned.");
+                throw new PaymentException("Payment Failed: Invoice tracking serial '" + dto.getInvoiceNumber() + "' is already assigned.");
             }
 
             Payment payment = MappingUtil.toPaymentEntity(dto);
@@ -60,18 +60,20 @@ public class PaymentBOImpl implements PaymentBO {
     @Override
     public PaymentDTO getInvoiceDetails(String invoiceNumber) throws Exception {
         if (!ValidationUtil.isRequiredFieldFilled(invoiceNumber)) {
-            throw new RegistrationException("Lookup Failed: Target validation lookup invoice parameters cannot be blank.");
+            throw new PaymentException("Lookup Failed: Target validation lookup invoice parameters cannot be blank.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Read transaction context added, legacy finally-close removed
             transaction = session.beginTransaction();
 
             Payment payment = paymentDAO.findByInvoiceNumber(invoiceNumber);
-            PaymentDTO dto = MappingUtil.toPaymentDTO(payment);
+            if (payment == null) {
+                throw new PaymentException("Lookup Failed: Invoice '" + invoiceNumber + "' not found in ledger database.");
+            }
 
+            PaymentDTO dto = MappingUtil.toPaymentDTO(payment);
             transaction.commit();
             return dto;
         } catch (Exception e) {
@@ -83,13 +85,12 @@ public class PaymentBOImpl implements PaymentBO {
     @Override
     public List<PaymentDTO> getFinancialReportByStatus(String status) throws Exception {
         if (!ValidationUtil.isRequiredFieldFilled(status)) {
-            throw new RegistrationException("Report Failed: Filtering criterion condition token cannot be empty.");
+            throw new PaymentException("Report Failed: Filtering criterion condition token cannot be empty.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Read transaction context added, legacy finally-close removed
             transaction = session.beginTransaction();
 
             List<Payment> payments = paymentDAO.findPaymentsByStatus(status);
@@ -112,7 +113,6 @@ public class PaymentBOImpl implements PaymentBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Read transaction context added, legacy finally-close removed
             transaction = session.beginTransaction();
 
             List<Payment> payments = paymentDAO.findAll();
