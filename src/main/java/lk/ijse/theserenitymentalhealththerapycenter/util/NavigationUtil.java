@@ -13,7 +13,7 @@ public class NavigationUtil {
      * Swaps the view inside an active AnchorPane container.
      */
     public static void navigateTo(AnchorPane contextPane, String fxmlPath) throws IOException {
-        URL resource = NavigationUtil.class.getResource("/view/" + fxmlPath);
+        URL resource = NavigationUtil.class.getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/" + fxmlPath);
         if (resource == null) {
             throw new IOException("FXML file not found: /view/" + fxmlPath);
         }

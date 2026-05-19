@@ -2,51 +2,67 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Maven model version -->
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Project details -->
     <groupId>lk.ijse</groupId>
     <artifactId>theserenitymentalhealththerapycenter</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>theserenitymentalhealththerapycenter</name>
 
+    <!-- Global project properties -->
     <properties>
+        <!-- Character encoding -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Java version -->
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+
+        <!-- JUnit version -->
         <junit.version>5.12.1</junit.version>
     </properties>
 
     <dependencies>
+
+        <!-- JavaFX UI controls like Button, Label, TableView -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>21.0.6</version>
         </dependency>
 
+        <!-- JavaFX FXML support -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>21.0.6</version>
         </dependency>
 
+        <!-- Main Hibernate ORM framework -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>6.6.4.Final</version>
         </dependency>
 
+        <!-- Hibernate second-level caching support -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jcache</artifactId>
             <version>6.6.4.Final</version>
         </dependency>
 
+        <!-- MySQL database connector -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.3.0</version>
         </dependency>
 
+        <!-- Lombok reduces boilerplate code like getters/setters -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -54,34 +70,40 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Password hashing library -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
 
+        <!-- Ikonli support for JavaFX icons -->
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-javafx</artifactId>
             <version>12.3.1</version>
         </dependency>
 
+        <!-- FontAwesome icon pack for Ikonli -->
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-fontawesome5-pack</artifactId>
             <version>12.3.1</version>
         </dependency>
 
+        <!-- Bootstrap-style CSS for JavaFX -->
         <dependency>
             <groupId>org.kordamp.bootstrapfx</groupId>
             <artifactId>bootstrapfx-core</artifactId>
             <version>0.4.0</version>
         </dependency>
 
+        <!-- Ehcache caching provider -->
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>3.10.8</version>
+            <!-- Excluding conflicting JAXB dependencies -->
             <exclusions>
                 <exclusion>
                     <groupId>org.glassfish.jaxb</groupId>
@@ -102,42 +124,49 @@
             </exclusions>
         </dependency>
 
+        <!-- Java caching API -->
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
             <version>1.1.1</version>
         </dependency>
 
+        <!-- Jakarta XML Binding API -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>4.0.2</version>
         </dependency>
 
+        <!-- JAXB runtime implementation -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>4.0.5</version>
         </dependency>
 
+        <!-- Old JAXB API support -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
 
+        <!-- JAXB implementation -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>2.3.3</version>
         </dependency>
 
+        <!-- Logging framework -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.4.14</version>
         </dependency>
 
+        <!-- JUnit API for writing test cases -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -145,6 +174,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JUnit engine for running tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -155,6 +185,7 @@
 
     <build>
         <plugins>
+            <!-- Compiles Java source code -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -165,6 +196,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Plugin to run JavaFX applications -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>

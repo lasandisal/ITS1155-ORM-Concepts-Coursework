@@ -1,0 +1,289 @@
+package lk.ijse.theserenitymentalhealththerapycenter.controller;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.BOFactory;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.BOType;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.PatientBO;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapistBO;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapyProgramBO;
+import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapySessionBO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapistDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapyProgramDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapySessionDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.SessionStatus;
+import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class SessionFormController {
+
+    @FXML private Button btnBook;
+    @FXML private Button btnCancel;
+    @FXML private Button btnClear;
+
+    @FXML private ComboBox<Long> cmbPatientId;
+    @FXML private ComboBox<String> cmbProgramId;
+    @FXML private ComboBox<SessionStatus> cmbSessionStatus;
+    @FXML private ComboBox<Long> cmbTherapistId;
+
+    @FXML private TableColumn<TherapySessionDTO, LocalDateTime> colDateTime;
+    @FXML private TableColumn<TherapySessionDTO, Long> colId;
+    @FXML private TableColumn<TherapySessionDTO, String> colPatient;
+    @FXML private TableColumn<TherapySessionDTO, String> colProgram;
+    @FXML private TableColumn<TherapySessionDTO, SessionStatus> colStatus;
+    @FXML private TableColumn<TherapySessionDTO, String> colTherapist;
+
+    @FXML private DatePicker dtSessionDate;
+    @FXML private TableView<TherapySessionDTO> tblSessions;
+    @FXML private TextField txtSearchSessions;
+    @FXML private TextField txtSessionTime;
+
+    // Core Business Logic Object Dependencies
+    private final TherapySessionBO sessionBO = (TherapySessionBO) BOFactory.getInstance().getBO(BOType.THERAPY_SESSION);
+    private final PatientBO patientBO = (PatientBO) BOFactory.getInstance().getBO(BOType.PATIENT);
+    private final TherapistBO therapistBO = (TherapistBO) BOFactory.getInstance().getBO(BOType.THERAPIST);
+    private final TherapyProgramBO programBO = (TherapyProgramBO) BOFactory.getInstance().getBO(BOType.THERAPY_PROGRAM);
+
+    private final ObservableList<TherapySessionDTO> sessionList = FXCollections.observableArrayList();
+    private Long selectedSessionId = null;
+
+    @FXML
+    public void initialize() {
+        initializeTableColumns();
+        loadAllChoiceSelectors();
+        loadAllScheduledSessions();
+    }
+
+    private void initializeTableColumns() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colPatient.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+        colTherapist.setCellValueFactory(new PropertyValueFactory<>("therapistName"));
+        colProgram.setCellValueFactory(new PropertyValueFactory<>("programName"));
+        colDateTime.setCellValueFactory(new PropertyValueFactory<>("sessionDateTime"));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+    }
+
+    private void loadAllChoiceSelectors() {
+        try {
+            // Populate target primary combo choice slots
+            List<Long> patients = patientBO.getAllActivePatients().stream().map(PatientDTO::getId).collect(Collectors.toList());
+            cmbPatientId.setItems(FXCollections.observableArrayList(patients));
+
+            List<Long> therapists = therapistBO.getAllActiveTherapists().stream().map(TherapistDTO::getId).collect(Collectors.toList());
+            cmbTherapistId.setItems(FXCollections.observableArrayList(therapists));
+
+            List<String> programs = programBO.getAllActivePrograms().stream().map(TherapyProgramDTO::getId).collect(Collectors.toList());
+            cmbProgramId.setItems(FXCollections.observableArrayList(programs));
+
+            cmbSessionStatus.setItems(FXCollections.observableArrayList(SessionStatus.values()));
+            cmbSessionStatus.setValue(SessionStatus.SCHEDULED);
+
+        } catch (Exception e) {
+            AlertUtil.showError("Initialization Error", "Choice Mappings Selection Failed", e.getMessage());
+        }
+    }
+
+    private void loadAllScheduledSessions() {
+        try {
+            sessionList.clear();
+            List<TherapySessionDTO> activeSessions = sessionBO.getAllSessionsWithFullDetails();
+            sessionList.addAll(activeSessions);
+            tblSessions.setItems(sessionList);
+        } catch (Exception e) {
+            AlertUtil.showError("Database Error", "Appointments Registry Load Failure", e.getMessage());
+        }
+    }
+
+    @FXML
+    void btnBookOnAction(ActionEvent event) {
+        if (cmbPatientId.getValue() == null || cmbTherapistId.getValue() == null ||
+                cmbProgramId.getValue() == null || dtSessionDate.getValue() == null) {
+            AlertUtil.showWarning("Validation Error", "Missing parameters", "All relational assignment criteria fields are mandatory.");
+            return;
+        }
+
+        LocalDateTime resolvedDateTime;
+        try {
+            LocalTime parsedTime = LocalTime.parse(txtSessionTime.getText().trim(), DateTimeFormatter.ofPattern("HH:mm"));
+            resolvedDateTime = LocalDateTime.of(dtSessionDate.getValue(), parsedTime);
+        } catch (DateTimeParseException e) {
+            AlertUtil.showWarning("Validation Error", "Invalid Time Pattern", "Please use the strict standard standard 24-hour time notation layout (e.g., 14:30).");
+            return;
+        }
+
+        TherapySessionDTO dto = new TherapySessionDTO();
+        dto.setPatientId(cmbPatientId.getValue());
+        dto.setTherapistId(cmbTherapistId.getValue());
+        dto.setProgramId(cmbProgramId.getValue());
+        dto.setSessionDateTime(resolvedDateTime);
+        dto.setStatus(cmbSessionStatus.getValue());
+
+        if (selectedSessionId == null) {
+            handleBooking(dto);
+        } else {
+            dto.setId(selectedSessionId);
+            handleRescheduling(dto);
+        }
+    }
+
+    private void handleBooking(TherapySessionDTO dto) {
+        try {
+            if (sessionBO.bookSession(dto)) {
+                AlertUtil.showSuccess("Booking Complete", "Appointment Fixed", "Therapy session locked and assigned successfully.");
+                loadAllScheduledSessions();
+                clearFormFields();
+            }
+        } catch (Exception e) {
+            AlertUtil.showWarning("Booking Dropped", "Practitioner Clash", e.getMessage());
+        }
+    }
+
+    private void handleRescheduling(TherapySessionDTO dto) {
+        try {
+            if (sessionBO.rescheduleSession(dto)) {
+                AlertUtil.showSuccess("Reschedule Complete", "Timestamp Adjusted", "Therapy appointment shifted successfully.");
+                loadAllScheduledSessions();
+                clearFormFields();
+            }
+        } catch (Exception e) {
+            AlertUtil.showWarning("Reschedule Dropped", "Availability Exception", e.getMessage());
+        }
+    }
+
+    @FXML
+    void btnCancelOnAction(ActionEvent event) {
+        if (selectedSessionId == null) {
+            AlertUtil.showWarning("Selection Error", "No Target Selected", "Please choose a session to cancel.");
+            return;
+        }
+
+        boolean confirm = AlertUtil.showConfirmation("Confirm Action", "Appointment Cancellation Pending", "Soft-delete and drop this scheduled clinical slot?");
+        if (!confirm) return;
+
+        try {
+            if (sessionBO.cancelSession(selectedSessionId)) {
+                AlertUtil.showSuccess("Purge Complete", "Session Cancelled", "Appointment entry state switched to CANCELLED status.");
+                loadAllScheduledSessions();
+                clearFormFields();
+            }
+        } catch (Exception e) {
+            AlertUtil.showError("Database Drop Failure", "Purge Execution Dropped", e.getMessage());
+        }
+    }
+
+    @FXML
+    void btnClearOnAction(ActionEvent event) {
+        clearFormFields();
+    }
+
+    @FXML
+    void tblSessionsOnMouseClicked(MouseEvent event) {
+        TherapySessionDTO selectedSession = tblSessions.getSelectionModel().getSelectedItem();
+        if (selectedSession != null) {
+            selectedSessionId = selectedSession.getId();
+            cmbPatientId.setValue(selectedSession.getPatientId());
+            cmbTherapistId.setValue(selectedSession.getTherapistId());
+            cmbProgramId.setValue(selectedSession.getProgramId());
+
+            dtSessionDate.setValue(selectedSession.getSessionDateTime().toLocalDate());
+            txtSessionTime.setText(selectedSession.getSessionDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+            cmbSessionStatus.setValue(selectedSession.getStatus());
+
+            btnBook.setText("Reschedule Session");
+
+            // ✅ ADDED: Double-click launches the modal summary card view
+            if (event.getClickCount() == 2) {
+                openSessionDetailCard(selectedSession);
+            }
+        }
+    }
+
+    @FXML
+    void txtSearchSessionsOnKeyReleased(KeyEvent event) {
+        String query = txtSearchSessions.getText().trim().toLowerCase();
+
+        // ✅ ADDED: Capture KeyCode.ENTER to load top matching record into separate modal card view
+        if (event.getCode() == KeyCode.ENTER && !tblSessions.getItems().isEmpty()) {
+            TherapySessionDTO topMatchedSession = tblSessions.getItems().get(0);
+            openSessionDetailCard(topMatchedSession);
+            return;
+        }
+
+        if (query.isEmpty()) {
+            loadAllScheduledSessions();
+            return;
+        }
+
+        ObservableList<TherapySessionDTO> filtered = sessionList.stream()
+                .filter(s -> (s.getPatientName() != null && s.getPatientName().toLowerCase().contains(query)) ||
+                        (s.getTherapistName() != null && s.getTherapistName().toLowerCase().contains(query)))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+        tblSessions.setItems(filtered);
+    }
+
+    // ✅ ADDED: Native Modal Spawning Engine Block Routing
+    private void openSessionDetailCard(TherapySessionDTO session) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/TherapySessionDetailCard.fxml"));
+            AnchorPane pane = loader.load();
+
+            TherapySessionDetailCardController controller = loader.getController();
+            controller.setSessionData(session);
+
+            Stage modalStage = new Stage();
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.initStyle(StageStyle.UTILITY);
+            modalStage.setTitle("Clinical Session Verification Card");
+            modalStage.setScene(new Scene(pane));
+            modalStage.setResizable(false);
+            modalStage.centerOnScreen();
+            modalStage.showAndWait();
+
+        } catch (IOException e) {
+            AlertUtil.showError("System Error", "Modal View Load Failure", "Unable to launch secondary view card layout.");
+            e.printStackTrace();
+        }
+    }
+
+    // Action Placeholders for contextual lookups
+    @FXML void cmbPatientOnAction(ActionEvent event) {}
+    @FXML void cmbProgramOnAction(ActionEvent event) {}
+    @FXML void cmbTherapistOnAction(ActionEvent event) {}
+
+    private void clearFormFields() {
+        selectedSessionId = null;
+        cmbPatientId.setValue(null);
+        cmbTherapistId.setValue(null);
+        cmbProgramId.setValue(null);
+        dtSessionDate.setValue(null);
+        txtSessionTime.clear();
+        txtSearchSessions.clear();
+        cmbSessionStatus.setValue(SessionStatus.SCHEDULED);
+        btnBook.setText("Book Session");
+        tblSessions.getSelectionModel().clearSelection();
+    }
+}

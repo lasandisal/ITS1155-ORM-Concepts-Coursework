@@ -4,10 +4,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
@@ -17,7 +16,6 @@
 
         <VBox prefWidth="260.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-
                 <VBox alignment="CENTER" spacing="8.0" style="-fx-padding: 30 0 20 0;">
                     <children>
                         <FontIcon iconColor="#4A90E2" iconLiteral="fas-heartbeat" iconSize="42" />
@@ -69,13 +67,13 @@
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnProgramCatalog" alignment="CENTER_LEFT" onAction="#btnProgramCatalogOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Therapy Catalog">
+                        <Button fx:id="btnTherapyCatalog" alignment="CENTER_LEFT" onAction="#btnTherapyCatalogOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Therapy Catalog">
                             <graphic>
                                 <FontIcon iconLiteral="fas-notes-medical" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnSessionSchedule" alignment="CENTER_LEFT" onAction="#btnSessionScheduleOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Appointments">
+                        <Button fx:id="btnSessionSchedule" alignment="CENTER_LEFT" onAction="#btnSessionScheduleOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Sessions">
                             <graphic>
                                 <FontIcon iconLiteral="fas-calendar-check" iconSize="16" styleClass="icon-margin" />
                             </graphic>
@@ -94,7 +92,7 @@
 
                 <VBox spacing="4.0" style="-fx-padding: 0 10 0 10;">
                     <children>
-                        <Button fx:id="btnInvoicePOS" alignment="CENTER_LEFT" onAction="#handleInvoicePOSOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Generate Invoice">
+                        <Button fx:id="btnGenerateInvoice" alignment="CENTER_LEFT" onAction="#handleGenerateInvoice" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Generate Invoice">
                             <graphic>
                                 <FontIcon iconLiteral="fas-receipt" iconSize="16" styleClass="icon-margin" />
                             </graphic>
@@ -128,7 +126,50 @@
             </children>
         </VBox>
 
-        <AnchorPane fx:id="contentArea" styleClass="content-area" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <HBox alignment="CENTER_LEFT" layoutX="260.0" prefHeight="70.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0;" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <padding>
+                <Insets left="30.0" right="30.0" />
+            </padding>
+            <children>
+                <Label fx:id="lblViewTitle" text="Overview Insights" textFill="#1E293B">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" style="-fx-background-color: #F1F5F9; -fx-padding: 6 12; -fx-background-radius: 6;">
+                            <children>
+                                <FontIcon iconColor="#0284C7" iconLiteral="fas-clock" iconSize="14" />
+                                <Label fx:id="lblSystemTime" text="Loading clock..." textFill="#475569">
+                                    <font>
+                                        <Font name="System" size="13.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+
+                        <Separator orientation="VERTICAL" style="-fx-opacity: 0.4;" prefHeight="25.0" />
+
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" style="-fx-background-color: #F0FDF4; -fx-padding: 6 12; -fx-background-radius: 6; -fx-border-color: #DCFCE7; -fx-border-width: 1;">
+                            <children>
+                                <FontIcon iconColor="#16A34A" iconLiteral="fas-user-shield" iconSize="14" />
+                                <Label fx:id="lblLoggedInUser" text="Initializing Context..." textFill="#14532D">
+                                    <font>
+                                        <Font name="System Bold" size="13.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <AnchorPane fx:id="contentArea" styleClass="content-area" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
         </AnchorPane>
 
     </children>

@@ -7,10 +7,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOType;
@@ -20,6 +27,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,54 +35,35 @@ import java.util.List;
 
 public class PatientFormController {
 
-    @FXML private Label lblSystemTime;
-    @FXML private Label lblLoggedInUser;
-    @FXML private TextField txtName;
-    @FXML private TextField txtEmail;
-    @FXML private TextField txtPhone;
-    @FXML private TextArea txtMedicalHistory;
-    @FXML private TextField txtSearchProgram;
+    @FXML private Button btnClear;
+    @FXML private Button btnDelete;
+    @FXML private Button btnSave; // Single button text dynamically flips: "Save Intake" / "Update Profile"
 
-    @FXML private TableView<PatientDTO> tblPatient;
-    @FXML private TableColumn<PatientDTO, Long> colId;
-    @FXML private TableColumn<PatientDTO, String> colName;
     @FXML private TableColumn<PatientDTO, String> colEmail;
+    @FXML private TableColumn<PatientDTO, Long> colId;
+    @FXML private TableColumn<PatientDTO, String> colMedicalHistory;
+    @FXML private TableColumn<PatientDTO, String> colName;
     @FXML private TableColumn<PatientDTO, String> colPhone;
     @FXML private TableColumn<PatientDTO, LocalDate> colRegDate;
-    @FXML private TableColumn<PatientDTO, String> colMedicalHistory;
 
-    // Fetching our concrete Patient Service implementation via the BO Factory
+    @FXML private TableView<PatientDTO> tblPatient;
+
+    @FXML private TextField txtEmail;
+    @FXML private TextArea txtMedicalHistory;
+    @FXML private TextField txtName;
+    @FXML private TextField txtPhone;
+    @FXML private TextField txtSearchProgram;
+
     private final PatientBO patientBO = (PatientBO) BOFactory.getInstance().getBO(BOType.PATIENT);
     private final ObservableList<PatientDTO> patientList = FXCollections.observableArrayList();
-    private Long selectedPatientId = null; // Track selected rows for update/delete actions
+    private Long selectedPatientId = null;
 
     @FXML
     public void initialize() {
-        startLiveSystemClock();
         initializeTableColumns();
         loadAllActivePatients();
     }
 
-    /**
-     * Spawns a background timeline loop to keep the clinical clock accurate to the second.
-     */
-    private void startLiveSystemClock() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd | hh:mm:ss a");
-        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            lblSystemTime.setText("System Time: " + LocalDateTime.now().format(formatter));
-        }), new KeyFrame(Duration.seconds(1)));
-        clock.setCycleCount(Animation.INDEFINITE);
-        clock.play();
-    }
-
-    /**
-     * Binds the logged-in user profile text dynamically from the dashboard login session.
-     */
-    public void setSessionUserContext(UserDTO user) {
-        if (user != null) {
-            lblLoggedInUser.setText(user.getFullName() + " (" + user.getRole().name() + ")");
-        }
-    }
 
     private void initializeTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -92,16 +81,20 @@ public class PatientFormController {
             patientList.addAll(allPatients);
             tblPatient.setItems(patientList);
         } catch (Exception e) {
-            AlertUtil.showError(
-                    "Database Error",
-                    "Registry Load Failure",
-                    "Failed to retrieve active client records from the database: " + e.getMessage()
-            );
+            AlertUtil.showError("Database Error", "Registry Load Failure", e.getMessage());
         }
     }
 
     @FXML
     void btnSaveOnAction(ActionEvent event) {
+        if (selectedPatientId == null) {
+            handleSavePatient();
+        } else {
+            handleUpdatePatient();
+        }
+    }
+
+    private void handleSavePatient() {
         try {
             PatientDTO dto = new PatientDTO(
                     null,
@@ -109,39 +102,21 @@ public class PatientFormController {
                     txtEmail.getText().trim(),
                     txtPhone.getText().trim(),
                     txtMedicalHistory.getText().trim(),
-                    LocalDate.now(), // Dynamic server-side intake date logging
+                    LocalDate.now(),
                     CommonStatus.ACTIVE
             );
 
             if (patientBO.savePatient(dto)) {
-                AlertUtil.showSuccess(
-                        "Registration Success",
-                        "Intake Completed",
-                        "New patient profile has been successfully added to the clinical registry."
-                );
+                AlertUtil.showSuccess("Registration Success", "Intake Completed", "New patient profile successfully added.");
                 loadAllActivePatients();
                 clearFormFields();
             }
         } catch (Exception e) {
-            AlertUtil.showWarning(
-                    "Validation Error",
-                    "Invalid Fields Detected",
-                    e.getMessage()
-            );
+            AlertUtil.showWarning("Validation Error", "Invalid Fields", e.getMessage());
         }
     }
 
-    @FXML
-    void btnUpdateOnAction(ActionEvent event) {
-        if (selectedPatientId == null) {
-            AlertUtil.showWarning(
-                    "Selection Error",
-                    "No Target Selected",
-                    "Please pick a target row from the registry table to modify."
-            );
-            return;
-        }
-
+    private void handleUpdatePatient() {
         try {
             PatientDTO dto = new PatientDTO(
                     selectedPatientId,
@@ -149,79 +124,44 @@ public class PatientFormController {
                     txtEmail.getText().trim(),
                     txtPhone.getText().trim(),
                     txtMedicalHistory.getText().trim(),
-                    null, // Keep original date intact in the database layer via managed dirty checking
+                    null,
                     CommonStatus.ACTIVE
             );
 
             if (patientBO.updatePatient(dto)) {
-                AlertUtil.showSuccess(
-                        "Profile Modified",
-                        "Update Successful",
-                        "Patient information has been updated successfully in the system."
-                );
+                AlertUtil.showSuccess("Profile Modified", "Update Successful", "Patient information updated successfully.");
                 loadAllActivePatients();
                 clearFormFields();
             }
         } catch (Exception e) {
-            AlertUtil.showWarning(
-                    "Update Failure",
-                    "Database Modification Dropped",
-                    e.getMessage()
-            );
+            AlertUtil.showWarning("Update Failure", "Modification Dropped", e.getMessage());
         }
     }
 
     @FXML
     void btnDeleteOnAction(ActionEvent event) {
         if (selectedPatientId == null) {
-            AlertUtil.showWarning(
-                    "Selection Error",
-                    "No Target Selected",
-                    "Please pick a target row from the registry table to remove."
-            );
+            AlertUtil.showWarning("Selection Error", "No Target Selected", "Please select a patient from the table.");
             return;
         }
 
-        boolean confirmation = AlertUtil.showConfirmation(
-                "Confirm Action",
-                "Profile Deactivation Pending",
-                "Are you sure you want to soft-delete this patient profile?"
-        );
+        boolean confirmation = AlertUtil.showConfirmation("Confirm Action", "Profile Deactivation Pending", "Soft-delete this patient profile?");
         if (!confirmation) return;
 
         try {
             if (patientBO.softDeletePatient(selectedPatientId)) {
-                AlertUtil.showSuccess(
-                        "Profile Purged",
-                        "Deactivation Complete",
-                        "Patient profile successfully switched to INACTIVE status."
-                );
+                AlertUtil.showSuccess("Profile Purged", "Deactivation Complete", "Patient profile set to INACTIVE.");
                 loadAllActivePatients();
                 clearFormFields();
             }
         } catch (Exception e) {
-            AlertUtil.showError(
-                    "Deletion Error",
-                    "Database Drop Failure",
-                    e.getMessage()
-            );
+            AlertUtil.showError("Deletion Error", "Database Drop Failure", e.getMessage());
         }
     }
 
     @FXML
-    void txtSearchProgramOnKeyReleased(KeyEvent event) {
-        String filterQuery = txtSearchProgram.getText().trim();
-        if (filterQuery.isEmpty()) {
-            loadAllActivePatients();
-            return;
-        }
-
-        try {
-            List<PatientDTO> filteredList = patientBO.searchPatientsByTherapyProgram(filterQuery);
-            tblPatient.setItems(FXCollections.observableArrayList(filteredList));
-        } catch (Exception e) {
-            System.err.println("Live filter exception query error: " + e.getMessage());
-        }
+    void btnClearOnAction(ActionEvent event) {
+        clearFormFields();
     }
 
     @FXML
@@ -233,12 +173,60 @@ public class PatientFormController {
             txtEmail.setText(selectedPatient.getEmail());
             txtPhone.setText(selectedPatient.getPhone());
             txtMedicalHistory.setText(selectedPatient.getMedicalHistory());
+
+            btnSave.setText("Update Profile");
+
+            if (event.getClickCount() == 2) {
+                openPatientDetailCard(selectedPatient);
+            }
         }
     }
 
     @FXML
-    void btnClearOnAction(ActionEvent event) {
-        clearFormFields();
+    void txtSearchProgramOnKeyReleased(KeyEvent event) {
+        String filterQuery = txtSearchProgram.getText().trim();
+
+        // When user types and hits ENTER, grab top record result and render separate modal card view
+        if (event.getCode() == KeyCode.ENTER && !tblPatient.getItems().isEmpty()) {
+            PatientDTO topMatchedPatient = tblPatient.getItems().get(0);
+            openPatientDetailCard(topMatchedPatient);
+            return;
+        }
+
+        if (filterQuery.isEmpty()) {
+            loadAllActivePatients();
+            return;
+        }
+
+        try {
+            List<PatientDTO> filteredList = patientBO.searchPatientsByTherapyProgram(filterQuery);
+            tblPatient.setItems(FXCollections.observableArrayList(filteredList));
+        } catch (Exception e) {
+            System.err.println("Search filter error: " + e.getMessage());
+        }
+    }
+
+    private void openPatientDetailCard(PatientDTO patient) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/PatientDetailCard.fxml"));
+            AnchorPane pane = loader.load();
+
+            PatientDetailCardController controller = loader.getController();
+            controller.setPatientData(patient);
+
+            Stage modalStage = new Stage();
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.initStyle(StageStyle.UTILITY);
+            modalStage.setTitle("Clinical Registry Summary Card");
+            modalStage.setScene(new Scene(pane));
+            modalStage.setResizable(false);
+            modalStage.centerOnScreen();
+            modalStage.showAndWait();
+
+        } catch (IOException e) {
+            AlertUtil.showError("System Error", "Modal View Load Failure", "Unable to launch secondary view card layout.");
+            e.printStackTrace();
+        }
     }
 
     private void clearFormFields() {
@@ -247,6 +235,7 @@ public class PatientFormController {
         txtEmail.clear();
         txtPhone.clear();
         txtMedicalHistory.clear();
+        btnSave.setText("Save Intake");
         tblPatient.getSelectionModel().clearSelection();
     }
 }

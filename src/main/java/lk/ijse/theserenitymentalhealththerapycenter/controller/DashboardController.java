@@ -1,122 +1,173 @@
 package lk.ijse.theserenitymentalhealththerapycenter.controller;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
+import lk.ijse.theserenitymentalhealththerapycenter.util.NavigationUtil;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
 public class DashboardController {
 
-    @FXML private Button btnTherapistManage;
-    @FXML private Button btnProgramCatalog;
-    @FXML private Button btnInvoicePOS;
+    @FXML private Button btnDashboard;
+    @FXML private Button btnGenerateInvoice;
+    @FXML private Button btnPatientManage;
     @FXML private Button btnPaymentTracking;
-
-    // FIX 1: Declared the missing content canvas container field linked from Dashboard.fxml
+    @FXML private Button btnSessionSchedule;
+    @FXML private Button btnTherapistManage;
+    @FXML private Button btnTherapyCatalog;
     @FXML private AnchorPane contentArea;
 
-    // FIX 2: Centralized session state variable to keep track of who is logged in
+    // ✅ Track your global layout header injections
+    @FXML private Label lblViewTitle;
+    @FXML private Label lblSystemTime;
+    @FXML private Label lblLoggedInUser;
+
     private UserDTO authenticatedUser;
 
+    @FXML
+    public void initialize() {
+        startGlobalClock();
+    }
+
     /**
-     * Initializes structural menu constraints dynamically based on authentication context data structures.
-     * Enforces explicit access parameters for Admins, Receptionists, and shared workspaces.
+     * Spawns a background thread-safe loop to keep the clinical clock accurate.
+     */
+    private void startGlobalClock() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd | hh:mm:ss a");
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
+            lblSystemTime.setText("System Time: " + LocalDateTime.now().format(formatter));
+        }), new KeyFrame(Duration.seconds(1)));
+        clock.setCycleCount(Animation.INDEFINITE);
+        clock.play();
+    }
+
+    /**
+     * Configure security visibility profiles once upon direct session validation.
      */
     public void configureAccessPrivileges(UserDTO activeUser) {
         if (activeUser == null) return;
-
-        // Save the profile globally so it persists safely across sidebar navigation item clicks
         this.authenticatedUser = activeUser;
 
+        // ✅ Centralized injection setup for user role badge display
+        lblLoggedInUser.setText(activeUser.getFullName() + " (" + activeUser.getRole().name() + ")");
+
         UserRole role = activeUser.getRole();
-
         switch (role) {
-            case ADMIN:
+            case ADMIN -> {
                 btnTherapistManage.setVisible(true);
-                btnProgramCatalog.setVisible(true);
-                btnInvoicePOS.setVisible(false);
+                btnTherapyCatalog.setVisible(true);
+                btnGenerateInvoice.setVisible(false);
                 btnPaymentTracking.setVisible(false);
-                break;
-
-            case RECEPTIONIST:
+            }
+            case RECEPTIONIST -> {
                 btnTherapistManage.setVisible(false);
-                btnProgramCatalog.setVisible(false);
-                btnInvoicePOS.setVisible(true);
+                btnTherapyCatalog.setVisible(false);
+                btnGenerateInvoice.setVisible(true);
                 btnPaymentTracking.setVisible(true);
-                break;
-
-            default:
+            }
+            default -> {
                 btnTherapistManage.setVisible(false);
-                btnInvoicePOS.setVisible(false);
+                btnTherapyCatalog.setVisible(false);
+                btnGenerateInvoice.setVisible(false);
                 btnPaymentTracking.setVisible(false);
-                btnProgramCatalog.setVisible(false);
-                break;
+            }
         }
 
-        // Best Practice: Default load the overview dashboard or patient intake on login success
-        navigateToPatientManagement();
+        // Set default system entry view dashboard viewport configuration maps
+        setActiveNavigation(btnPatientManage);
+        lblViewTitle.setText("Patient Intake & Clinical Registry");
+        loadView("PatientForm.fxml");
     }
 
-    /**
-     * Standard non-parameterized event method connected straight to your Dashboard.fxml sidebar button.
-     */
-    @FXML
-    void btnPatientManageOnAction(ActionEvent event) {
-        navigateToPatientManagement();
-    }
-
-    /**
-     * Orchestrates the dynamic view swapping workflow inside the decoupled content area container.
-     */
-    private void navigateToPatientManagement() {
+    private void loadView(String fxmlFile) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/PatientForm.fxml"));
-            AnchorPane pane = loader.load();
-
-            // Fetch the loaded controller instance
-            PatientFormController controller = loader.getController();
-
-            // Pass the globally cached active user profile safely down to the sub-view elements
-            controller.setSessionUserContext(authenticatedUser);
-
-            // Bind the new view node cleanly inside the layout canvas area
-            contentArea.getChildren().setAll(pane);
-            AnchorPane.setTopAnchor(pane, 0.0);
-            AnchorPane.setBottomAnchor(pane, 0.0);
-            AnchorPane.setLeftAnchor(pane, 0.0);
-            AnchorPane.setRightAnchor(pane, 0.0);
-
+            NavigationUtil.navigateTo(contentArea, fxmlFile);
         } catch (IOException e) {
             e.printStackTrace();
-            AlertUtil.showError(
-                    "Navigation Error",
-                    "Workspace Loading Failed",
-                    "Could not load the Patient Management workspace canvas view file."
-            );
+            AlertUtil.showError("Navigation Error", "View Loading Failed", "Unable to load: " + fxmlFile);
+        }
+    }
+
+    private void setActiveNavigation(Button activeButton) {
+        List<Button> navigationButtons = Arrays.asList(
+                btnDashboard, btnPatientManage, btnTherapistManage,
+                btnTherapyCatalog, btnSessionSchedule, btnGenerateInvoice, btnPaymentTracking
+        );
+
+        for (Button button : navigationButtons) {
+            button.getStyleClass().remove("active-nav-button");
+        }
+
+        if (activeButton != null) {
+            activeButton.getStyleClass().add("active-nav-button");
         }
     }
 
     @FXML
-    void btnDashboardOnAction(ActionEvent event) { /* Load Overview FXML */ }
+    void btnDashboardOnAction(ActionEvent event) {
+        setActiveNavigation(btnDashboard);
+        lblViewTitle.setText("Overview Insights Dashboard");
+        loadView("OverviewForm.fxml");
+    }
 
     @FXML
-    void btnTherapistManageOnAction(ActionEvent event) { /* Load Therapist FXML */ }
+    void btnPatientManageOnAction(ActionEvent event) {
+        setActiveNavigation(btnPatientManage);
+        lblViewTitle.setText("Patient Intake & Clinical Registry");
+        loadView("PatientForm.fxml");
+    }
 
     @FXML
-    void btnProgramCatalogOnAction(ActionEvent event) { /* Load Catalog FXML */ }
+    void btnPaymentTrackingOnAction(ActionEvent event) {
+        setActiveNavigation(btnPaymentTracking);
+        lblViewTitle.setText("Financial Accounts Ledger");
+        loadView("PaymentForm.fxml");
+    }
 
     @FXML
-    void handleInvoicePOSOnAction(ActionEvent event) { /* Load POS FXML */ }
+    void btnSessionScheduleOnAction(ActionEvent event) {
+        setActiveNavigation(btnSessionSchedule);
+        lblViewTitle.setText("Clinical Appointment Scheduler");
+        loadView("SessionForm.fxml");
+    }
 
     @FXML
-    void btnPaymentTrackingOnAction(ActionEvent event) { /* Load Ledger FXML */ }
+    void btnTherapistManageOnAction(ActionEvent event) {
+        setActiveNavigation(btnTherapistManage);
+        lblViewTitle.setText("Therapist Roster Directory");
+        loadView("TherapistForm.fxml");
+    }
 
     @FXML
-    void handleLogOutOnAction(ActionEvent event) { /* Handle teardown and return to login stage */ }
+    void btnTherapyCatalogOnAction(ActionEvent event) {
+        setActiveNavigation(btnTherapyCatalog);
+        lblViewTitle.setText("Therapy Framework Catalog");
+        loadView("TherapyCatalogForm.fxml");
+    }
+
+    @FXML
+    void handleGenerateInvoice(ActionEvent event) {
+        setActiveNavigation(btnGenerateInvoice);
+        lblViewTitle.setText("Point Of Sale - Generate Invoice");
+        loadView("InvoiceForm.fxml");
+    }
+
+    @FXML
+    void handleLogOutOnAction(ActionEvent event) {
+        AlertUtil.showInformation("Logout", null, "Logout execution sequence routing will drop context maps here.");
+    }
 }

@@ -57,14 +57,11 @@ public class PatientBOImpl implements PatientBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public boolean updatePatient(PatientDTO dto) throws Exception {
-
         if (!ValidationUtil.isRequiredFieldFilled(dto.getName()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getEmail()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getPhone())) {
@@ -102,8 +99,6 @@ public class PatientBOImpl implements PatientBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -123,54 +118,72 @@ public class PatientBOImpl implements PatientBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public PatientDTO getPatientById(Long id) throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            transaction = session.beginTransaction();
+
             Patient patient = patientDAO.findById(id);
             if (patient == null || patient.getStatus() == Patient.Status.INACTIVE) {
+                transaction.commit();
                 return null;
             }
-            return MappingUtil.toPatientDTO(patient);
-        } finally {
-            session.close();
+
+            PatientDTO dto = MappingUtil.toPatientDTO(patient);
+            transaction.commit();
+            return dto;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public List<PatientDTO> getAllActivePatients() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            transaction = session.beginTransaction();
+
             List<Patient> patients = patientDAO.findAllActive();
             List<PatientDTO> dtoList = new ArrayList<>();
 
             for (Patient patient : patients) {
                 dtoList.add(MappingUtil.toPatientDTO(patient));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public List<PatientDTO> searchPatientsByTherapyProgram(String programId) throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            transaction = session.beginTransaction();
+
             List<Patient> patients = patientDAO.searchPatientsByProgram(programId);
             List<PatientDTO> dtoList = new ArrayList<>();
 
             for (Patient patient : patients) {
                 dtoList.add(MappingUtil.toPatientDTO(patient));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

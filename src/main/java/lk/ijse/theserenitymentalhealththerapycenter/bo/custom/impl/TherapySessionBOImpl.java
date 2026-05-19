@@ -37,6 +37,7 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         try {
             transaction = session.beginTransaction();
 
+            // Inter-DAO validation runs within the same active thread session beautifully
             boolean isAvailable = therapistDAO.isTherapistAvailable(dto.getTherapistId(), dto.getSessionDateTime());
             if (!isAvailable) {
                 throw new RegistrationException("Booking Failed: Selected Therapist is already booked for this specific time slot.");
@@ -53,8 +54,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -89,8 +88,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -110,15 +107,16 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public List<TherapySessionDTO> getAllSessionsWithFullDetails() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Wrapped inside read transaction to clear 'createQuery' validity rules
+            transaction = session.beginTransaction();
 
             List<TherapySession> sessions = sessionDAO.findAllSessionsWithDetails();
             List<TherapySessionDTO> dtoList = new ArrayList<>();
@@ -126,16 +124,22 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             for (TherapySession s : sessions) {
                 dtoList.add(MappingUtil.toTherapySessionDTO(s));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public List<PatientDTO> getPatientsEnrolledInAllPrograms() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Wrapped complex criteria queries in a safe read transaction wrapper context
+            transaction = session.beginTransaction();
 
             List<Patient> patients = sessionDAO.findPatientsEnrolledInAllPrograms();
             List<PatientDTO> dtoList = new ArrayList<>();
@@ -143,9 +147,12 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             for (Patient patient : patients) {
                 dtoList.add(MappingUtil.toPatientDTO(patient));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

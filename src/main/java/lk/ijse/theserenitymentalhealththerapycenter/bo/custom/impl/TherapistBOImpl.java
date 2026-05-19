@@ -55,14 +55,11 @@ public class TherapistBOImpl implements TherapistBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public boolean updateTherapist(TherapistDTO dto) throws Exception {
-
         if (!ValidationUtil.isRequiredFieldFilled(dto.getName()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getSpecialization()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getEmail()) ||
@@ -102,8 +99,6 @@ public class TherapistBOImpl implements TherapistBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -123,34 +118,47 @@ public class TherapistBOImpl implements TherapistBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public List<TherapistDTO> getAllActiveTherapists() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Read transaction started to allow 'createQuery' to run safely
+            transaction = session.beginTransaction();
+
             List<Therapist> therapists = therapistDAO.findAllActive();
             List<TherapistDTO> dtoList = new ArrayList<>();
 
             for (Therapist therapist : therapists) {
                 dtoList.add(MappingUtil.toTherapistDTO(therapist));
             }
+
+            transaction.commit(); // ✅ Session auto-closes here
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public boolean checkAvailability(Long therapistId, LocalDateTime dateTime) throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
-            return therapistDAO.isTherapistAvailable(therapistId, dateTime);
-        } finally {
-            session.close();
+            // ✅ FIXED: Read transaction started to handle validation queries safely
+            transaction = session.beginTransaction();
+
+            boolean isAvailable = therapistDAO.isTherapistAvailable(therapistId, dateTime);
+
+            transaction.commit(); // ✅ Session auto-closes here
+            return isAvailable;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

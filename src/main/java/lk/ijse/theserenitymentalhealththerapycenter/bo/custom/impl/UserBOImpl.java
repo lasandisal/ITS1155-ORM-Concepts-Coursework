@@ -60,8 +60,6 @@ public class UserBOImpl implements UserBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -72,7 +70,11 @@ public class UserBOImpl implements UserBO {
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
+
         try {
+            transaction = session.beginTransaction();
+
             User user = userDAO.findByUsername(username);
 
             if (user == null) {
@@ -87,10 +89,12 @@ public class UserBOImpl implements UserBO {
                 throw new LoginException("Login failed: This user account has been deactivated.");
             }
 
+            transaction.commit();
             return MappingUtil.toUserDTO(user);
 
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
@@ -118,8 +122,6 @@ public class UserBOImpl implements UserBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -139,15 +141,17 @@ public class UserBOImpl implements UserBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public List<UserDTO> getAllActiveUsers() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Wrapped inside an active read transaction to clear context validity checks
+            transaction = session.beginTransaction();
+
             List<User> users = userDAO.findAll();
             List<UserDTO> dtoList = new ArrayList<>();
 
@@ -156,9 +160,12 @@ public class UserBOImpl implements UserBO {
                     dtoList.add(MappingUtil.toUserDTO(user));
                 }
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

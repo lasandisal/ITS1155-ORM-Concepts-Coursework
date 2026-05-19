@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaymentBOImpl implements PaymentBO {
-    private final PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOType.PATIENT);;
+
+    // ✅ FIXED: Corrected the DAO type mapping from PATIENT to PAYMENT and stripped the double semicolon
+    private final PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOType.PAYMENT);
 
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
@@ -52,8 +54,6 @@ public class PaymentBOImpl implements PaymentBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -64,11 +64,19 @@ public class PaymentBOImpl implements PaymentBO {
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Read transaction context added, legacy finally-close removed
+            transaction = session.beginTransaction();
+
             Payment payment = paymentDAO.findByInvoiceNumber(invoiceNumber);
-            return MappingUtil.toPaymentDTO(payment);
-        } finally {
-            session.close();
+            PaymentDTO dto = MappingUtil.toPaymentDTO(payment);
+
+            transaction.commit();
+            return dto;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
@@ -79,32 +87,46 @@ public class PaymentBOImpl implements PaymentBO {
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Read transaction context added, legacy finally-close removed
+            transaction = session.beginTransaction();
+
             List<Payment> payments = paymentDAO.findPaymentsByStatus(status);
             List<PaymentDTO> dtoList = new ArrayList<>();
 
             for (Payment p : payments) {
                 dtoList.add(MappingUtil.toPaymentDTO(p));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public List<PaymentDTO> getAllTransactionsLog() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            // ✅ FIXED: Read transaction context added, legacy finally-close removed
+            transaction = session.beginTransaction();
+
             List<Payment> payments = paymentDAO.findAll();
             List<PaymentDTO> dtoList = new ArrayList<>();
 
             for (Payment p : payments) {
                 dtoList.add(MappingUtil.toPaymentDTO(p));
             }
+
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

@@ -21,7 +21,6 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
 
     @Override
     public boolean saveProgram(TherapyProgramDTO dto) throws Exception {
-
         if (!ValidationUtil.isRequiredFieldFilled(dto.getId()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getName()) ||
                 !ValidationUtil.isRequiredFieldFilled(dto.getDuration())) {
@@ -38,7 +37,6 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
         try {
             transaction = session.beginTransaction();
 
-            TherapistBOImpl existenceCheck = null;
             TherapyProgram existing = programDAO.findById(dto.getId());
             if (existing != null) {
                 throw new RegistrationException("Registration Failed: A program with ID '" + dto.getId() + "' already exists in the catalog.");
@@ -55,8 +53,6 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -94,8 +90,6 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
@@ -115,29 +109,36 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        } finally {
-            session.close();
         }
     }
 
     @Override
     public TherapyProgramDTO getProgramById(String id) throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            transaction = session.beginTransaction();
+
             TherapyProgram program = programDAO.findById(id);
             if (program == null || program.getStatus() == TherapyProgram.Status.INACTIVE) {
+                transaction.commit();
                 return null;
             }
-            return MappingUtil.toTherapyProgramDTO(program);
-        } finally {
-            session.close();
+            TherapyProgramDTO dto = MappingUtil.toTherapyProgramDTO(program);
+            transaction.commit();
+            return dto;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
     @Override
     public List<TherapyProgramDTO> getAllActivePrograms() throws Exception {
         Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
         try {
+            transaction = session.beginTransaction();
 
             List<TherapyProgram> programs = programDAO.findAllActive();
             List<TherapyProgramDTO> dtoList = new ArrayList<>();
@@ -145,9 +146,11 @@ public class TherapyProgramBOImpl implements TherapyProgramBO {
             for (TherapyProgram program : programs) {
                 dtoList.add(MappingUtil.toTherapyProgramDTO(program));
             }
+            transaction.commit();
             return dtoList;
-        } finally {
-            session.close();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }

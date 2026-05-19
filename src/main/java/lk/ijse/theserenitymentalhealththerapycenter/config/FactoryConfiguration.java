@@ -4,6 +4,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.entity.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class FactoryConfiguration {
 
@@ -52,7 +53,7 @@ public class FactoryConfiguration {
 
 
     public Session getSession() {
-        return sessionFactory.openSession();
+        return sessionFactory.getCurrentSession();
     }
 
     private void seedDefaultAdmin() {
@@ -70,7 +71,7 @@ public class FactoryConfiguration {
                 admin.setUsername("admin");
 
                 // NOTE: If you use BCrypt encryption util, encrypt it: PasswordUtil.hashPassword("admin123")
-                admin.setPassword("admin123");
+                admin.setPassword(BCrypt.hashpw("admin123", BCrypt.gensalt()));
 
                 admin.setFullName("S.A.L.U. Salwathura");
                 admin.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.ADMIN);

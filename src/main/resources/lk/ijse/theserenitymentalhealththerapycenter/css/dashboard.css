@@ -1,95 +1,120 @@
-/* Application Structural Canvas Constants */
+/* =====================================================
+   ROOT CANVAS & LAYOUT DESIGN
+===================================================== */
 .root {
     -fx-background-color: #F8FAFC;
-    -fx-font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-/* Sidebar Core Structure Frame Layout */
+.content-area {
+    -fx-background-color: #F8FAFC;
+    -fx-padding: 0;
+}
+
+/* =====================================================
+   STATIC LEFT SIDEBAR SYSTEM
+===================================================== */
 .sidebar {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #E2E8F0;
-    -fx-border-width: 0 1px 0 0;
-    -fx-effect: dropshadow(three-pass-box, rgba(148, 163, 184, 0.05), 15, 0, 4, 0);
+    -fx-border-width: 0 1px 0 0; /* Clean separation line on right */
+    -fx-pref-width: 260px;
 }
 
-/* Typography Header Logotype Brand Accent */
+.sidebar-separator {
+    -fx-opacity: 0.4;
+    -fx-background-color: #E2E8F0;
+}
+
+/* =====================================================
+   TYPOGRAPHY & BRANDING HEADERS
+===================================================== */
 .logo-text {
-    -fx-text-fill: #1E293B;
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-letter-spacing: 0.5px;
+}
+
+.menu-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748B; /* Professional slate gray tracking */
     -fx-letter-spacing: 1px;
 }
 
-/* Functional Category Form Headings */
-.menu-label {
-    -fx-text-fill: #94A3B8;
-    -fx-font-weight: bold;
-}
-
-/* Base Navigation Button Layout Configuration */
+/* =====================================================
+   NAVIGATION CONTROLS (SIDEBAR BUTTONS)
+===================================================== */
 .nav-button {
     -fx-background-color: transparent;
-    -fx-background-radius: 8px;
-    -fx-text-fill: #64748B;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
-    -fx-cursor: hand;
+    -fx-background-radius: 12px;
     -fx-alignment: center-left;
-    -fx-padding: 0 0 0 15px;
-    -fx-transition: all 0.2s ease-in-out;
+    -fx-padding: 12px 16px 12px 16px;
+    -fx-cursor: hand;
 }
 
-/* Hover Interactive Styling Transitions */
+/* Sidebar Hover Mechanics */
 .nav-button:hover {
     -fx-background-color: #F1F5F9;
-    -fx-text-fill: #1E293B;
+    -fx-text-fill: #0F172A;
 }
 
-/* Selected Active Menu Component Feedback State Look */
-.nav-button:focused, .nav-button:active {
-    -fx-background-color: #E0F2FE;
-    -fx-text-fill: #0369A1;
-    -fx-font-weight: bold;
+/* Dynamic Active Selection State Override */
+.nav-button.active-nav-button {
+    -fx-background-color: #EEF2FF; /* Indigo micro tint accent background */
+    -fx-text-fill: #4F46E5;        /* Premium dark royal indigo text signature */
 }
 
-/* Standardizing Graphic Space Alignment Padding */
-.nav-button .ikonli-font-icon {
-    -fx-icon-color: #94A3B8;
+.nav-button.active-nav-button .ikonli-font-icon {
+    -fx-icon-color: #4F46E5;       /* Snaps matching color straight down to the glyph icon */
 }
 
-.nav-button:hover .ikonli-font-icon {
-    -fx-icon-color: #1E293B;
+/* Helper spacing utility for internal icons */
+.icon-margin {
+    -fx-padding: 0 12px 0 0;
 }
 
-.nav-button:focused .ikonli-font-icon {
-    -fx-icon-color: #0369A1;
-}
-
-/* Boundary Elements Dividers Styles */
-.sidebar-separator {
-    -fx-opacity: 0.6;
-    -fx-background-color: #F1F5F9;
-}
-
-/* System Exit Custom Actions Control Button Component */
+/* =====================================================
+   DESTRUCTIVE LOGOUT CALL TO ACTION
+===================================================== */
 .logout-button {
-    -fx-background-color: #FEF2F2;
-    -fx-background-radius: 8px;
-    -fx-text-fill: #EF4444;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
+    -fx-background-color: transparent;
+    -fx-text-fill: #94A3B8;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 12px;
     -fx-alignment: center-left;
-    -fx-padding: 0 0 0 15px;
+    -fx-padding: 12px 16px 12px 16px;
+    -fx-cursor: hand;
 }
 
 .logout-button:hover {
-    -fx-background-color: #FEE2E2;
-    -fx-effect: dropshadow(three-pass-box, rgba(239, 68, 68, 0.1), 8, 0, 0, 2);
+    -fx-background-color: #FEF2F2; /* Soft red alert hover backing */
+    -fx-text-fill: #DC2626;        /* Bold system crimson warning accent */
 }
 
-.logout-button .ikonli-font-icon {
-    -fx-icon-color: #EF4444;
+.logout-button:hover .ikonli-font-icon {
+    -fx-icon-color: #DC2626;
 }
 
-/* Primary Workspace Canvas Environment Styles */
-.content-area {
+/* =====================================================
+   GLOBAL SEGREGATED TOP HEADER PANEL
+===================================================== */
+.global-header-title {
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: bold;
+}
+
+/* Reusable contextual container elements matching your badge profiles */
+.meta-widget-clean {
+    -fx-alignment: center-left;
     -fx-background-color: #F8FAFC;
+    -fx-background-radius: 12px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 8px 14px 8px 14px;
 }
