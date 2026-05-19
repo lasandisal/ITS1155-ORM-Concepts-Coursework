@@ -1,87 +1,95 @@
-/* Sidebar Setup */
-.sidebar {
-    -fx-background-color: #F0F8FF;
-    -fx-border-color: transparent #E2E8F0 transparent transparent;
-    -fx-border-width: 1px;
-}
-
-.content-area {
+/* Application Structural Canvas Constants */
+.root {
     -fx-background-color: #F8FAFC;
+    -fx-font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-/* Typography styles */
+/* Sidebar Core Structure Frame Layout */
+.sidebar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 0 1px 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(148, 163, 184, 0.05), 15, 0, 4, 0);
+}
+
+/* Typography Header Logotype Brand Accent */
 .logo-text {
-    -fx-text-fill: #1E3A8A; /* Clean Dark Medical Blue */
+    -fx-text-fill: #1E293B;
+    -fx-letter-spacing: 1px;
 }
 
+/* Functional Category Form Headings */
 .menu-label {
-    -fx-text-fill: #94A3B8; /* Slate gray */
-}
-
-.nav-text {
-    -fx-text-fill: #475569;
-    -fx-font-size: 13px;
+    -fx-text-fill: #94A3B8;
     -fx-font-weight: bold;
 }
 
-/* Strip default styling from buttons completely */
-.nav-button, .logout-button {
+/* Base Navigation Button Layout Configuration */
+.nav-button {
     -fx-background-color: transparent;
-    -fx-background-insets: 0;
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
-    -fx-padding: 0;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
     -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 15px;
+    -fx-transition: all 0.2s ease-in-out;
 }
 
-/* Icon base colors */
-.icon-default {
-    -fx-icon-color: #64748B;
-}
-
-/* Interactive Navigation States */
+/* Hover Interactive Styling Transitions */
 .nav-button:hover {
     -fx-background-color: #F1F5F9;
-    -fx-background-radius: 6px;
-}
-.nav-button:hover .nav-text {
-    -fx-text-fill: #2563EB; /* Soft brand blue */
-}
-.nav-button:hover .icon-default {
-    -fx-icon-color: #2563EB;
+    -fx-text-fill: #1E293B;
 }
 
-/* Active Selected/Focused Tab Style */
-.nav-button:focused {
-    -fx-background-color: #E0F2FE; /* Smooth light blue tint */
-    -fx-background-radius: 6px;
-}
-.nav-button:focused .nav-text {
+/* Selected Active Menu Component Feedback State Look */
+.nav-button:focused, .nav-button:active {
+    -fx-background-color: #E0F2FE;
     -fx-text-fill: #0369A1;
+    -fx-font-weight: bold;
 }
-.nav-button:focused .icon-default {
+
+/* Standardizing Graphic Space Alignment Padding */
+.nav-button .ikonli-font-icon {
+    -fx-icon-color: #94A3B8;
+}
+
+.nav-button:hover .ikonli-font-icon {
+    -fx-icon-color: #1E293B;
+}
+
+.nav-button:focused .ikonli-font-icon {
     -fx-icon-color: #0369A1;
 }
 
-/* Logout Button Actions */
+/* Boundary Elements Dividers Styles */
+.sidebar-separator {
+    -fx-opacity: 0.6;
+    -fx-background-color: #F1F5F9;
+}
+
+/* System Exit Custom Actions Control Button Component */
 .logout-button {
-    -fx-text-fill: #DC2626;
+    -fx-background-color: #FEF2F2;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 15px;
 }
-.logout-icon {
-    -fx-icon-color: #DC2626;
-}
+
 .logout-button:hover {
     -fx-background-color: #FEE2E2;
-    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(three-pass-box, rgba(239, 68, 68, 0.1), 8, 0, 0, 2);
 }
 
-/* User icon metadata */
-.user-icon {
-    -fx-icon-color: #3B82F6;
+.logout-button .ikonli-font-icon {
+    -fx-icon-color: #EF4444;
 }
 
-/* Clean Line Separator styling */
-.separator .line {
-    -fx-border-color: #E2E8F0;
-    -fx-border-width: 1px 0 0 0;
+/* Primary Workspace Canvas Environment Styles */
+.content-area {
+    -fx-background-color: #F8FAFC;
 }

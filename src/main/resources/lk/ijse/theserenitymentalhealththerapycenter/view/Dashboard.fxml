@@ -12,178 +12,123 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane stylesheets="@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.theserenitymentalhealththerapycenter.controller.DashboardController">
+<AnchorPane minHeight="720.0" minWidth="1280.0" stylesheets="@../css/dashboard.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.theserenitymentalhealththerapycenter.controller.DashboardController">
     <children>
 
-        <VBox prefWidth="240.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <VBox prefWidth="260.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
 
-                <VBox alignment="CENTER" prefHeight="101.0" prefWidth="238.0" spacing="5.0" style="-fx-padding: 30 0 20 0;">
+                <VBox alignment="CENTER" spacing="8.0" style="-fx-padding: 30 0 20 0;">
                     <children>
-                        <ImageView fitHeight="77.0" fitWidth="78.0" preserveRatio="true">
-                            <image>
-                                <Image url="@../images/SerenityLogo.png" />
-                            </image>
-                        </ImageView>
-                        <Label styleClass="logo-text" text="The Serenity Center">
+                        <FontIcon iconColor="#4A90E2" iconLiteral="fas-heartbeat" iconSize="42" />
+                        <Label styleClass="logo-text" text="THE SERENITY" textFill="#2C3E50">
                             <font>
-                                <Font name="System Bold" size="15.0" />
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <Label text="Clinical Portal" textFill="#7F8C8D">
+                            <font>
+                                <Font name="System Italic" size="11.0" />
                             </font>
                         </Label>
                     </children>
                 </VBox>
 
-                <Separator styleClass="separator">
+                <Separator styleClass="sidebar-separator">
                     <VBox.margin>
-                        <Insets bottom="10.0" left="20.0" right="20.0" />
+                        <Insets bottom="15.0" left="20.0" right="20.0" />
                     </VBox.margin>
                 </Separator>
 
-                <Label styleClass="menu-label" text="MAIN MENU">
+                <Label styleClass="menu-label" text="CLINICAL CORE">
                     <font>
-                        <Font name="System Bold" size="11.0" />
+                        <Font name="System Bold" size="10.0" />
                     </font>
                     <VBox.margin>
-                        <Insets bottom="10.0" left="25.0" top="5.0" />
+                        <Insets bottom="8.0" left="25.0" />
                     </VBox.margin>
                 </Label>
 
-                <VBox prefWidth="220.0" spacing="5.0" style="-fx-padding: 5;" VBox.vgrow="ALWAYS">
+                <VBox spacing="4.0" style="-fx-padding: 0 10 0 10;">
                     <children>
-
-                        <Button fx:id="btnDashboard" alignment="CENTER_LEFT" onAction="#btnDashboardOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
+                        <Button fx:id="btnDashboard" alignment="CENTER_LEFT" onAction="#btnDashboardOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Overview Insights">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-chart-pie" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Dashboard" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
+                                <FontIcon iconLiteral="fas-th-large" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnPatientManage" alignment="CENTER_LEFT" onAction="#btnPatientManageOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
+                        <Button fx:id="btnPatientManage" alignment="CENTER_LEFT" onAction="#btnPatientManageOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Patient Intake">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-user-injured" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Patient Manage" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
+                                <FontIcon iconLiteral="fas-user-injured" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnPaymentManage" alignment="CENTER_LEFT" onAction="#btnPaymentManageOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
+                        <Button fx:id="btnTherapistManage" alignment="CENTER_LEFT" onAction="#btnTherapistManageOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Therapist Roster">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-credit-card" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Payment Manage" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
+                                <FontIcon iconLiteral="fas-user-md" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnTherapistManage" alignment="CENTER_LEFT" onAction="#btnTherapistManageOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
+                        <Button fx:id="btnProgramCatalog" alignment="CENTER_LEFT" onAction="#btnProgramCatalogOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Therapy Catalog">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-user-md" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Therapist Manage" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
+                                <FontIcon iconLiteral="fas-notes-medical" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnProgramManage" alignment="CENTER_LEFT" onAction="#btnProgramManageOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
+                        <Button fx:id="btnSessionSchedule" alignment="CENTER_LEFT" onAction="#btnSessionScheduleOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Appointments">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-calendar-alt" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Therapist Program Manage" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
+                                <FontIcon iconLiteral="fas-calendar-check" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
-
-                        <Button fx:id="btnTherapySession" alignment="CENTER_LEFT" onAction="#btnTherapySessionOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="nav-button">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                    <children>
-                                        <FontIcon iconLiteral="fas-brain" iconSize="16" styleClass="icon-default" />
-                                        <Label styleClass="nav-text" text="Therapy Session" />
-                                    </children>
-                                    <HBox.margin>
-                                        <Insets left="15.0" />
-                                    </HBox.margin>
-                                </HBox>
-                            </graphic>
-                        </Button>
-
                     </children>
+                </VBox>
+
+                <Label styleClass="menu-label" text="FINANCE &amp; INTEL">
+                    <font>
+                        <Font name="System Bold" size="10.0" />
+                    </font>
                     <VBox.margin>
-                        <Insets left="10.0" right="10.0" />
+                        <Insets bottom="8.0" left="25.0" top="20.0" />
                     </VBox.margin>
+                </Label>
+
+                <VBox spacing="4.0" style="-fx-padding: 0 10 0 10;">
+                    <children>
+                        <Button fx:id="btnInvoicePOS" alignment="CENTER_LEFT" onAction="#handleInvoicePOSOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Generate Invoice">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-receipt" iconSize="16" styleClass="icon-margin" />
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="btnPaymentTracking" alignment="CENTER_LEFT" onAction="#btnPaymentTrackingOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Payment Ledger">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-file-invoice-dollar" iconSize="16" styleClass="icon-margin" />
+                            </graphic>
+                        </Button>
+                    </children>
                 </VBox>
 
                 <VBox VBox.vgrow="ALWAYS" />
 
-                <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-padding: 5 0 5 25;">
-                    <children>
-                        <FontIcon iconLiteral="fas-user-circle" iconSize="22" styleClass="user-icon" />
-                        <VBox alignment="CENTER_LEFT">
-                            <children>
-                                <Label style="-fx-font-size: 10px; -fx-text-fill: #94A3B8;" text="Logged in as:">
-                           <font>
-                              <Font name="System Bold" size="12.0" />
-                           </font></Label>
-                                <Label fx:id="lblUserRole" style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #1A365D;" text="Receptionist" />
-                            </children>
-                        </VBox>
-                    </children>
-                </HBox>
-
-                <Separator styleClass="separator">
+                <Separator styleClass="sidebar-separator">
                     <VBox.margin>
-                        <Insets bottom="10.0" left="20.0" right="20.0" top="5.0" />
+                        <Insets bottom="15.0" left="20.0" right="20.0" />
                     </VBox.margin>
                 </Separator>
 
-                <Button alignment="CENTER_LEFT" onAction="#handleLogOutOnAction" prefHeight="45.0" prefWidth="220.0" styleClass="logout-button">
-                    <graphic>
-                        <HBox alignment="CENTER_LEFT" spacing="15.0">
-                            <children>
-                                <FontIcon iconLiteral="fas-sign-out-alt" iconSize="16" styleClass="logout-icon" />
-                                <Label style="-fx-text-fill: inherit; -fx-font-weight: bold;" text="Logout" />
-                            </children>
-                            <HBox.margin>
-                                <Insets left="15.0" />
-                            </HBox.margin>
-                        </HBox>
-                    </graphic>
-                    <VBox.margin>
-                        <Insets bottom="20.0" left="10.0" />
-                    </VBox.margin>
-                </Button>
+                <VBox style="-fx-padding: 0 10 15 10;">
+                    <children>
+                        <Button alignment="CENTER_LEFT" onAction="#handleLogOutOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="logout-button" text="Exit Session">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-power-off" iconSize="16" styleClass="icon-margin" />
+                            </graphic>
+                        </Button>
+                    </children>
+                </VBox>
             </children>
         </VBox>
 
-        <AnchorPane fx:id="contentArea" styleClass="content-area" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="240.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane fx:id="contentArea" styleClass="content-area" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         </AnchorPane>
 
     </children>

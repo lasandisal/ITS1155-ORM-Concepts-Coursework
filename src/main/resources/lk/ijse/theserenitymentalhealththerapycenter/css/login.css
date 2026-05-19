@@ -1,0 +1,77 @@
+.root {
+    -fx-font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Linear gradient style applied cleanly via CSS to keep Scene Builder safe */
+.gradient-bg {
+    -fx-fill: linear-gradient(to bottom right, #EDF4F9, #D6E6F2, #B9D7EA);
+}
+
+.main-container {
+    -fx-background-color: rgba(255, 255, 255, 0.75);
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(255, 255, 255, 0.6);
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(44, 62, 80, 0.08), 30, 0, 0, 15);
+}
+
+.glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-radius: 10px;
+    -fx-border-color: #D2D7DF;
+    -fx-border-width: 1px;
+}
+
+.glass-card:focused-within {
+    -fx-border-color: #4A90E2;
+    -fx-effect: dropshadow(three-pass-box, rgba(74, 144, 226, 0.2), 8, 0, 0, 0);
+    -fx-background-color: #FFFFFF;
+}
+
+.text-field, .password-field {
+    -fx-prompt-text-fill: #95A5A6;
+    -fx-font-size: 14px;
+}
+
+.combo-box {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2C3E50;
+    -fx-prompt-text-fill: #95A5A6;
+}
+
+.combo-box .cell {
+    -fx-text-fill: #2C3E50;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #7F8C8D;
+}
+
+.login-button {
+    -fx-background-color: linear-gradient(to right, #4A90E2, #357ABD);
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(74, 144, 226, 0.3), 12, 0, 0, 4);
+}
+
+.login-button:hover {
+    -fx-background-color: linear-gradient(to right, #357ABD, #2A6296);
+    -fx-effect: dropshadow(three-pass-box, rgba(74, 144, 226, 0.4), 15, 0, 0, 6);
+}
+
+.login-button:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.brand-icon {
+    -fx-effect: dropshadow(three-pass-box, rgba(74, 144, 226, 0.25), 10, 0, 0, 0);
+}
+
+.hyperlink:hover {
+    -fx-underline: true;
+}

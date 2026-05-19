@@ -2,6 +2,7 @@ package lk.ijse.theserenitymentalhealththerapycenter.dao.custom.impl;
 
 import lk.ijse.theserenitymentalhealththerapycenter.dao.BaseDAOImpl;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.UserDAO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.User;
 import org.hibernate.query.Query;
 
@@ -24,7 +25,7 @@ public class UserDAOImpl extends BaseDAOImpl implements UserDAO {
     public boolean delete(Long id) throws Exception {
         User user = findById(id);
         if (user != null) {
-            user.setStatus(User.Status.INACTIVE);
+            user.setStatus(CommonStatus.INACTIVE);
             getSession().merge(user);
             return true;
         }

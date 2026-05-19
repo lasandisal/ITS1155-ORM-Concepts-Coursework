@@ -34,6 +34,14 @@ public class AlertUtil {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
+    public static void showSuccess(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
     private static void showAlert(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

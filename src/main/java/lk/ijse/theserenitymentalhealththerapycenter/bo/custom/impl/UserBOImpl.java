@@ -6,6 +6,8 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOType;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.UserDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.User;
 import lk.ijse.theserenitymentalhealththerapycenter.exception.LoginException;
 import lk.ijse.theserenitymentalhealththerapycenter.exception.RegistrationException;
@@ -48,7 +50,7 @@ public class UserBOImpl implements UserBO {
 
             String hashedPassword = PasswordUtil.hashPassword(dto.getPassword());
             user.setPassword(hashedPassword);
-            user.setStatus(User.Status.ACTIVE);
+            user.setStatus(CommonStatus.ACTIVE);
 
             boolean isSaved = userDAO.save(user);
 
@@ -81,7 +83,7 @@ public class UserBOImpl implements UserBO {
                 throw new LoginException("Login failed: Invalid credentials.");
             }
 
-            if (user.getStatus() == User.Status.INACTIVE) {
+            if (user.getStatus() == CommonStatus.INACTIVE) {
                 throw new LoginException("Login failed: This user account has been deactivated.");
             }
 
@@ -101,13 +103,13 @@ public class UserBOImpl implements UserBO {
             transaction = session.beginTransaction();
 
             User user = userDAO.findById(dto.getId());
-            if (user == null || user.getStatus() == User.Status.INACTIVE) {
+            if (user == null || user.getStatus() == CommonStatus.INACTIVE) {
                 throw new RegistrationException("Update failed: User profile not found.");
             }
 
             user.setFullName(dto.getFullName());
             user.setEmail(dto.getEmail());
-            user.setRole(User.Role.valueOf(dto.getRole().name()));
+            user.setRole(UserRole.valueOf(dto.getRole().name()));
 
             boolean isUpdated = userDAO.update(user);
             transaction.commit();
@@ -150,7 +152,7 @@ public class UserBOImpl implements UserBO {
             List<UserDTO> dtoList = new ArrayList<>();
 
             for (User user : users) {
-                if (user.getStatus() == User.Status.ACTIVE) {
+                if (user.getStatus() == CommonStatus.ACTIVE) {
                     dtoList.add(MappingUtil.toUserDTO(user));
                 }
             }

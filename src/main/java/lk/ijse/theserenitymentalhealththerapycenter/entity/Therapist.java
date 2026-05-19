@@ -3,6 +3,10 @@ package lk.ijse.theserenitymentalhealththerapycenter.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import jakarta.persistence.Cacheable;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Therapist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

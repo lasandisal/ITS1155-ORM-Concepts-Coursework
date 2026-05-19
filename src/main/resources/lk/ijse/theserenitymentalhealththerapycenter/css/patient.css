@@ -1,0 +1,198 @@
+/* Base Canvas Constants */
+.content-canvas {
+    -fx-background-color: #F8FAFC;
+}
+
+/* Header Text Styles */
+.header-title {
+    -fx-text-fill: #1E293B;
+    -fx-font-weight: bold;
+}
+.header-subtitle {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
+}
+
+/* Form Container Card Structure */
+.form-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(three-pass-box, rgba(148, 163, 184, 0.06), 15, 0, 0, 4);
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+/* Field Input Wrapper Styling Blocks */
+.field-label {
+    -fx-text-fill: #475569;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+}
+
+.input-box {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 0 0 0 12px;
+}
+.input-box:focused-within {
+    -fx-border-color: #4A90E2;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(three-pass-box, rgba(74, 144, 226, 0.15), 6, 0, 0, 0);
+}
+
+/* Text Inputs Core Custom Overrides */
+.text-field-raw {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 10px 8px 5px;
+    -fx-text-fill: #1E293B;
+    -fx-font-size: 13px;
+}
+
+.text-area-raw {
+    -fx-background-color: #F8FAFC;
+    -fx-text-fill: #1E293B;
+    -fx-font-size: 13px;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+.text-area-raw .content {
+    -fx-background-color: transparent;
+}
+.text-area-raw:focused {
+    -fx-border-color: #4A90E2;
+    -fx-background-color: #FFFFFF;
+}
+
+/* Search Box Container Layout */
+.search-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.02), 5, 0, 0, 1);
+}
+.search-box:focused-within {
+    -fx-border-color: #4A90E2;
+}
+
+/* Operational Button Components Styling Core */
+.btn-save {
+    -fx-background-color: #4A90E2;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+.btn-save:hover { -fx-background-color: #357ABD; }
+
+.btn-update {
+    -fx-background-color: #E0F2FE;
+    -fx-text-fill: #0369A1;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+.btn-update:hover { -fx-background-color: #BAE6FD; }
+
+.btn-delete {
+    -fx-background-color: #FEF2F2;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+.btn-delete:hover { -fx-background-color: #FEE2E2; }
+
+.btn-clear {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #475569;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+.btn-clear:hover { -fx-background-color: #E2E8F0; }
+
+/* Scrollable Table Component Structure Overrides */
+.clinical-table {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 0;
+}
+
+.clinical-table .column-header-background {
+    -fx-background-color: #F1F5F9;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.clinical-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 0 1px 1px 0;
+}
+
+.clinical-table .column-header .label {
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.clinical-table .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #F1F5F9;
+    -fx-border-width: 0 0 1px 0;
+    -fx-size: 38px;
+}
+
+.clinical-table .table-row-cell:filled:hover {
+    -fx-background-color: #F8FAFC;
+}
+
+.clinical-table .table-row-cell:filled:selected {
+    -fx-background-color: #F0FDF4; /* Highlighting active patient row in clean success light green */
+    -fx-text-fill: #15803D;
+}
+.clinical-table .table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #1E293B;
+}
+
+/* Top Main Flex Row Alignment Box */
+.top-banner-row {
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Glassmorphic Consolidated Content Badge Box Container */
+.top-meta-badge-box {
+    -fx-background-color: rgba(241, 245, 249, 0.8);
+    -fx-background-radius: 30px; /* Smooth rounded pill look */
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 30px;
+}
+
+/* Individual Data Pill Items Row Structs */
+.meta-widget {
+    -fx-alignment: center-left;
+}
+
+/* Data Typography Value Formats */
+.status-meta-text {
+    -fx-text-fill: #334155;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.status-user-value {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}

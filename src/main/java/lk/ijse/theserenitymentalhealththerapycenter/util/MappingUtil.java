@@ -13,14 +13,18 @@ public class MappingUtil {
 
     public static User toUserEntity(UserDTO dto) {
         if (dto == null) return null;
+
         User user = new User();
         user.setId(dto.getId());
         user.setUsername(dto.getUsername());
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
-        if (dto.getRole() != null) user.setRole(User.Role.valueOf(dto.getRole().name()));
-        if (dto.getStatus() != null) user.setStatus(User.Status.valueOf(dto.getStatus().name()));
+
+        // FIX: Simple direct assignment since the enum types match perfectly now
+        user.setRole(dto.getRole());
+        user.setStatus(dto.getStatus());
+
         return user;
     }
 
