@@ -55,4 +55,11 @@ public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
         query.setParameter("status", Payment.Status.valueOf(status.toUpperCase()));
         return query.list();
     }
+
+    @Override
+    public String getLastInvoiceNumber() throws Exception {
+        return getSession().createQuery("SELECT p.invoiceNumber FROM Payment p ORDER BY p.id DESC", String.class)
+                .setMaxResults(1)
+                .uniqueResult();
+    }
 }

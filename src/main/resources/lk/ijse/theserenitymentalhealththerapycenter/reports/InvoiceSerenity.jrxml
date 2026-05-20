@@ -1,0 +1,97 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="TheSerenityInvoice" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7a3e207c-e917-46c9-9449-0b39531882fd">
+	<parameter name="pInvoiceNo" class="java.lang.String"/>
+	<parameter name="pPaymentDate" class="java.lang.String"/>
+	<parameter name="pPatientName" class="java.lang.String"/>
+	<parameter name="pProgramName" class="java.lang.String"/>
+	<parameter name="pAmount" class="java.lang.Double"/>
+	<query language="SQL"><![CDATA[]]></query>
+	<title height="140" splitType="Stretch">
+		<element kind="staticText" uuid="e622555d-198b-4ccd-a4a1-c59c53304058" x="0" y="0" width="380" height="30" forecolor="#1E3A8A" fontSize="22.0" bold="true">
+			<text><![CDATA[THE SERENITY]]></text>
+		</element>
+		<element kind="staticText" uuid="5c5381db-3b59-41f2-9cad-b64ae633acd1" x="0" y="30" width="380" height="15" forecolor="#64748B" fontSize="10.0" italic="true">
+			<text><![CDATA[Mental Health & Therapy Center]]></text>
+		</element>
+		<element kind="staticText" uuid="c226e44d-3bb5-4145-b0b3-903bf1d79fde" x="0" y="50" width="250" height="15" forecolor="#475569" fontSize="9.0">
+			<text><![CDATA[Galle & Ahangama, Sri Lanka.]]></text>
+		</element>
+		<element kind="staticText" uuid="b96f7183-44f8-43ad-ba60-43d8fbf50b6e" x="0" y="65" width="250" height="15" forecolor="#475569" fontSize="9.0">
+			<text><![CDATA[Contact: info@theserenity.com]]></text>
+		</element>
+		<element kind="staticText" uuid="0b3f9342-da78-4cfa-9fc5-2301c4749678" x="380" y="5" width="85" height="15" fontSize="10.0" bold="true" hTextAlign="Right">
+			<text><![CDATA[INVOICE NO:]]></text>
+		</element>
+		<element kind="textField" uuid="3836ce65-eca3-4cad-a6de-b1818def0a2b" x="470" y="5" width="85" height="15" forecolor="#0F172A" fontSize="10.0" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$P{pInvoiceNo}]]></expression>
+		</element>
+		<element kind="staticText" uuid="0f86baff-6386-4f3f-b3fe-2388707babe8" x="380" y="22" width="85" height="15" fontSize="10.0" hTextAlign="Right">
+			<text><![CDATA[Date:]]></text>
+		</element>
+		<element kind="textField" uuid="a7536f94-78c5-423f-8593-b6305b4858c2" x="470" y="22" width="85" height="15" forecolor="#334155" fontSize="10.0" hTextAlign="Right">
+			<expression><![CDATA[$P{pPaymentDate}]]></expression>
+		</element>
+		<element kind="line" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246" x="0" y="90" width="555" height="1" forecolor="#CBD5E1"/>
+		<element kind="staticText" uuid="727384d0-2f42-4354-a0c2-30cd125b30a0" x="0" y="100" width="90" height="15" forecolor="#475569" fontSize="10.0" bold="true">
+			<text><![CDATA[PATIENT NAME:]]></text>
+		</element>
+		<element kind="textField" uuid="8f4956f7-1f34-4cc4-8599-41fc5586a83e" x="100" y="100" width="350" height="15" forecolor="#1E293B" fontSize="11.0" bold="true">
+			<expression><![CDATA[$P{pPatientName}]]></expression>
+		</element>
+		<element kind="staticText" uuid="57aed2b1-4f4e-40a3-a6ad-54dae8dd4c5a" x="0" y="118" width="90" height="15" forecolor="#475569" fontSize="10.0">
+			<text><![CDATA[Account Status:]]></text>
+		</element>
+		<element kind="staticText" uuid="f38ffa1f-ec95-490d-866c-ad963f57aa90" x="100" y="118" width="100" height="15" forecolor="#16A34A" fontSize="10.0" bold="true">
+			<text><![CDATA[VERIFIED PAID]]></text>
+		</element>
+	</title>
+	<columnHeader height="30">
+		<element kind="line" uuid="0de4cffd-540c-4d7c-b224-d514caee9dfd" x="0" y="0" width="555" height="1" forecolor="#94A3B8"/>
+		<element kind="staticText" uuid="0e404a56-b218-44b2-8f70-f251d096cccd" x="10" y="5" width="400" height="20" forecolor="#334155" fontSize="11.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[ASSIGNED THERAPEUTIC TREATMENT PROGRAM FRAMEWORK]]></text>
+		</element>
+		<element kind="staticText" uuid="9c2384d8-2837-4de6-8325-88a19855ca17" x="430" y="5" width="115" height="20" forecolor="#334155" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[TOTAL FEES (LKR)]]></text>
+		</element>
+		<element kind="line" uuid="0486444e-c177-4af3-8db0-26c1c6e1203f" x="0" y="28" width="555" height="1" forecolor="#94A3B8"/>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<element kind="textField" uuid="868869a6-17f4-44b0-9ae8-e5e2f7161226" x="10" y="10" width="400" height="20" forecolor="#0F172A" fontSize="11.0" vTextAlign="Middle">
+				<expression><![CDATA[$P{pProgramName}]]></expression>
+			</element>
+			<element kind="textField" uuid="a061323d-5b26-4bf1-8402-6099e6468f3a" x="430" y="10" width="115" height="20" forecolor="#0F172A" fontSize="11.0" pattern="LKR #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$P{pAmount}]]></expression>
+			</element>
+			<element kind="line" uuid="d81f1014-b050-4aef-873c-74a8ae6467be" x="0" y="38" width="555" height="1" forecolor="#E2E8F0"/>
+		</band>
+	</detail>
+	<lastPageFooter height="130">
+		<element kind="staticText" uuid="7224dddf-2b29-4dbd-8ff2-13a3a7a0796e" x="40" y="10" width="220" height="70" forecolor="#F1F5F9" fontSize="55.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[PAID]]></text>
+		</element>
+		<element kind="staticText" uuid="811522d6-8d74-4e08-8f0d-fce8ebe28be2" x="280" y="15" width="140" height="20" forecolor="#475569" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[SUB TOTAL:]]></text>
+		</element>
+		<element kind="textField" uuid="f2241c3a-ff75-4df8-8883-02d09807c000" x="430" y="15" width="115" height="20" forecolor="#334155" fontSize="11.0" pattern="LKR #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$P{pAmount}]]></expression>
+		</element>
+		<element kind="staticText" uuid="7759811e-7f1e-4ab0-b9d4-5db52659c73f" x="280" y="38" width="140" height="20" forecolor="#475569" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[DISCOUNT:]]></text>
+		</element>
+		<element kind="staticText" uuid="f9cb912f-2616-4af5-b5a4-81869d6fd712" x="430" y="38" width="115" height="20" forecolor="#334155" fontSize="11.0" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[LKR 0.00]]></text>
+		</element>
+		<element kind="line" uuid="2ac7c70f-a1b5-47b7-9507-e70ca7432003" x="320" y="65" width="235" height="1" forecolor="#94A3B8"/>
+		<element kind="staticText" uuid="0aee4574-fd51-41b3-ac80-fa46455cdf40" x="280" y="73" width="140" height="25" forecolor="#1E3A8A" fontSize="13.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[NET GRAND TOTAL:]]></text>
+		</element>
+		<element kind="textField" uuid="134aa9a6-2921-4a98-aa5b-c0a9e01a77d3" x="430" y="73" width="115" height="25" forecolor="#1E3A8A" fontSize="13.0" pattern="LKR #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$P{pAmount}]]></expression>
+		</element>
+		<element kind="line" uuid="d81f1014-b050-4aef-873c-74a8ae646700" x="0" y="110" width="555" height="1" forecolor="#E2E8F0"/>
+		<element kind="staticText" uuid="de55a483-709d-4680-bdd9-a632b0933f3b" x="0" y="115" width="555" height="15" forecolor="#94A3B8" fontSize="8.0" italic="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Thank you for placing your therapeutic journey in our care. The Serenity Mental Health Center.]]></text>
+		</element>
+	</lastPageFooter>
+</jasperReport>

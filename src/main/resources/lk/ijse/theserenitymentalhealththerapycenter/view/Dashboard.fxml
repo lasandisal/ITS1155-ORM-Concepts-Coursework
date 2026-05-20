@@ -81,7 +81,7 @@
                     </children>
                 </VBox>
 
-                <Label styleClass="menu-label" text="FINANCE &amp; INTEL">
+                <Label fx:id="lblFinanceHeader" styleClass="menu-label" text="FINANCE &amp; INTEL">
                     <font>
                         <Font name="System Bold" size="10.0" />
                     </font>
@@ -92,15 +92,15 @@
 
                 <VBox spacing="4.0" style="-fx-padding: 0 10 0 10;">
                     <children>
-                        <Button fx:id="btnGenerateInvoice" alignment="CENTER_LEFT" onAction="#handleGenerateInvoice" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Generate Invoice">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-receipt" iconSize="16" styleClass="icon-margin" />
-                            </graphic>
-                        </Button>
-
+      
                         <Button fx:id="btnPaymentTracking" alignment="CENTER_LEFT" onAction="#btnPaymentTrackingOnAction" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Payment Ledger">
                             <graphic>
                                 <FontIcon iconLiteral="fas-file-invoice-dollar" iconSize="16" styleClass="icon-margin" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnGenerateInvoice" alignment="CENTER_LEFT" onAction="#handleGenerateInvoice" prefHeight="46.0" prefWidth="240.0" styleClass="nav-button" text="Generate Invoice">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-receipt" iconSize="16" styleClass="icon-margin" />
                             </graphic>
                         </Button>
                     </children>
@@ -152,7 +152,7 @@
                             </children>
                         </HBox>
 
-                        <Separator orientation="VERTICAL" style="-fx-opacity: 0.4;" prefHeight="25.0" />
+                        <Separator orientation="VERTICAL" prefHeight="25.0" style="-fx-opacity: 0.4;" />
 
                         <HBox alignment="CENTER_LEFT" spacing="8.0" style="-fx-background-color: #F0FDF4; -fx-padding: 6 12; -fx-background-radius: 6; -fx-border-color: #DCFCE7; -fx-border-width: 1;">
                             <children>

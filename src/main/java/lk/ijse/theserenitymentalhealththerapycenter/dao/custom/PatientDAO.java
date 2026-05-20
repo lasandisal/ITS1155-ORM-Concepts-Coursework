@@ -11,4 +11,5 @@ public interface PatientDAO extends CrudDAO<Patient, Long> {
     List<Patient> findAllActive() throws Exception;
     boolean existsByEmail(String email) throws Exception;
     List<Patient> searchPatientsByProgram(String programId) throws Exception;
+
 }

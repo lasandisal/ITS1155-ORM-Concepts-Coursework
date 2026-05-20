@@ -10,4 +10,5 @@ public interface PaymentDAO extends CrudDAO<Payment, Long> {
 
     Payment findByInvoiceNumber(String invoiceNumber) throws Exception;
     List<Payment> findPaymentsByStatus(String status) throws Exception;
+    String getLastInvoiceNumber() throws Exception;
 }

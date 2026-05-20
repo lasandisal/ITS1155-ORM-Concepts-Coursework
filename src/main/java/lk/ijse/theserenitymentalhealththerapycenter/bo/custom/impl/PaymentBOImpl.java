@@ -4,27 +4,33 @@ import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.PaymentBO;
 import lk.ijse.theserenitymentalhealththerapycenter.config.FactoryConfiguration;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOType;
+import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PatientDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
+import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
+import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapyProgram;
 import lk.ijse.theserenitymentalhealththerapycenter.exception.PaymentException;
 import lk.ijse.theserenitymentalhealththerapycenter.util.MappingUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.ValidationUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PaymentBOImpl implements PaymentBO {
 
     private final PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOType.PAYMENT);
+    private final PatientDAO patientDAO = (PatientDAO) DAOFactory.getInstance().getDAO(DAOType.PATIENT);
+    private final TherapyProgramDAO programDAO = (TherapyProgramDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_PROGRAM);
 
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
-        if (dto.getPatientId() == null || dto.getProgramId() == null ||
-                !ValidationUtil.isRequiredFieldFilled(dto.getInvoiceNumber()) || dto.getPaymentDate() == null) {
-            throw new PaymentException("Payment Failed: Incomplete processing parameters supplied.");
+        if (dto.getPatientId() == null || dto.getProgramId() == null) {
+            throw new PaymentException("Payment Failed: Target Patient and Therapy Program criteria must be specified.");
         }
 
         if (dto.getAmount() <= 0) {
@@ -37,13 +43,23 @@ public class PaymentBOImpl implements PaymentBO {
         try {
             transaction = session.beginTransaction();
 
-            Payment existingInvoice = paymentDAO.findByInvoiceNumber(dto.getInvoiceNumber());
-            // ✅ FIXED: Using specialized PaymentException over registration formats
-            if (existingInvoice != null) {
-                throw new PaymentException("Payment Failed: Invoice tracking serial '" + dto.getInvoiceNumber() + "' is already assigned.");
+            Patient patient = patientDAO.findById(dto.getPatientId());
+            TherapyProgram program = programDAO.findById(dto.getProgramId());
+
+            if (patient == null) {
+                throw new PaymentException("Processing Failure: Target patient profile missing from records.");
+            }
+            if (program == null) {
+                throw new PaymentException("Processing Failure: Target therapeutic program missing from catalog.");
             }
 
+            String nextInvoiceNumber = generateNextInvoiceNumber();
+            dto.setInvoiceNumber(nextInvoiceNumber); // Feed back to DTO wrapper immediately for Jasper printing step
+            dto.setPaymentDate(LocalDate.now());
+
             Payment payment = MappingUtil.toPaymentEntity(dto);
+            payment.setPatient(patient);
+            payment.setTherapyProgram(program);
             payment.setStatus(Payment.Status.SUCCESS);
 
             boolean isSaved = paymentDAO.save(payment);
@@ -128,5 +144,22 @@ public class PaymentBOImpl implements PaymentBO {
             if (transaction != null) transaction.rollback();
             throw e;
         }
+    }
+
+    // =============================================== Helpers ===============================================
+
+    private String generateNextInvoiceNumber() throws Exception {
+        String lastInvoice = paymentDAO.getLastInvoiceNumber();
+        int currentYear = LocalDate.now().getYear();
+
+        if (lastInvoice == null || !lastInvoice.startsWith("INV-" + currentYear + "-")) {
+            return String.format("INV-%d-0001", currentYear);
+        }
+
+        String[] parts = lastInvoice.split("-");
+        int lastNumericId = Integer.parseInt(parts[2]);
+        int nextNumericId = lastNumericId + 1;
+
+        return String.format("INV-%d-%04d", currentYear, nextNumericId);
     }
 }

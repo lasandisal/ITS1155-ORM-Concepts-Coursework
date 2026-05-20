@@ -60,4 +60,6 @@ public class PatientDAOImpl extends BaseDAOImpl implements PatientDAO {
         query.setParameter("progId", programId);
         return query.list();
     }
+
+
 }

@@ -36,7 +36,7 @@ public class FactoryConfiguration {
 
             // 4. Build the factory clean
             sessionFactory = configuration.buildSessionFactory();
-            seedDefaultAdmin();
+            seedInitialUsers();
 
         } catch (Exception e) {
             System.err.println("Initial SessionFactory creation failed! " + e.getMessage());
@@ -56,30 +56,53 @@ public class FactoryConfiguration {
         return sessionFactory.getCurrentSession();
     }
 
-    private void seedDefaultAdmin() {
+    private void seedInitialUsers() {
         Session session = sessionFactory.openSession();
         org.hibernate.Transaction transaction = null;
         try {
-            // Check if there are any records in the users table
-            Long userCount = (Long) session.createQuery("SELECT COUNT(u) FROM User u").uniqueResult();
+            transaction = session.beginTransaction();
 
-            if (userCount == 0) {
-                transaction = session.beginTransaction();
+            // 1. Validate and Seed Admin Profile
+            Long adminCount = (Long) session.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.username = 'admin'"
+            ).uniqueResult();
 
-                // Assuming your User entity uses fields like username, password, fullName, and role
+            if (adminCount == 0) {
                 User admin = new User();
                 admin.setUsername("admin");
-
-                // NOTE: If you use BCrypt encryption util, encrypt it: PasswordUtil.hashPassword("admin123")
                 admin.setPassword(BCrypt.hashpw("admin123", BCrypt.gensalt()));
-
-                admin.setFullName("S.A.L.U. Salwathura");
+                admin.setFullName("LasandiSal");
+                admin.setEmail("admin@theserenity.com"); // Added to satisfy potential validation rules
                 admin.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.ADMIN);
 
+                // ✅ FIX: Change this to match the exact status property expected by your User entity
+                admin.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
+
                 session.persist(admin);
-                transaction.commit();
-                System.out.println(">> Database Seeded: Default account created! [User: admin | Pass: admin123]");
+                System.out.println(">> Database Seeded: Default Admin created! [User: admin | Pass: admin123]");
             }
+
+            // 2. Validate and Seed Receptionist Profile
+            Long recepCount = (Long) session.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.username = 'receptionist'"
+            ).uniqueResult();
+
+            if (recepCount == 0) {
+                User receptionist = new User();
+                receptionist.setUsername("receptionist");
+                receptionist.setPassword(BCrypt.hashpw("recep123", BCrypt.gensalt()));
+                receptionist.setFullName("SelinErl");
+                receptionist.setEmail("reception@theserenity.com"); // Added to satisfy potential validation rules
+                receptionist.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.RECEPTIONIST);
+
+                // ✅ FIX: Match the exact same operational state format here
+                receptionist.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
+
+                session.persist(receptionist);
+                System.out.println(">> Database Seeded: Default Receptionist created! [User: receptionist | Pass: recep123]");
+            }
+
+            transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             System.err.println("Database seeding failed: " + e.getMessage());

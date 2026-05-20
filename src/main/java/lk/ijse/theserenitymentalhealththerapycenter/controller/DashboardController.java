@@ -5,9 +5,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
@@ -31,10 +35,13 @@ public class DashboardController {
     @FXML private Button btnTherapyCatalog;
     @FXML private AnchorPane contentArea;
 
-    // ✅ Track your global layout header injections
     @FXML private Label lblViewTitle;
     @FXML private Label lblSystemTime;
+
+    // ✅ Tracks the top global layout user session context badge wrapper
     @FXML private Label lblLoggedInUser;
+
+    @FXML private Label lblFinanceHeader;
 
     private UserDTO authenticatedUser;
 
@@ -43,51 +50,98 @@ public class DashboardController {
         startGlobalClock();
     }
 
-    /**
-     * Spawns a background thread-safe loop to keep the clinical clock accurate.
-     */
     private void startGlobalClock() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd | hh:mm:ss a");
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            lblSystemTime.setText("System Time: " + LocalDateTime.now().format(formatter));
+            lblSystemTime.setText(LocalDateTime.now().format(formatter));
         }), new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Animation.INDEFINITE);
         clock.play();
     }
 
     /**
-     * Configure security visibility profiles once upon direct session validation.
+     * Configure security visibility profiles dynamically matching corporate policy constraints.
      */
     public void configureAccessPrivileges(UserDTO activeUser) {
         if (activeUser == null) return;
         this.authenticatedUser = activeUser;
 
-        // ✅ Centralized injection setup for user role badge display
+        // ✅ FIXED: Centralized context injection sets label text value on login redirection
         lblLoggedInUser.setText(activeUser.getFullName() + " (" + activeUser.getRole().name() + ")");
 
         UserRole role = activeUser.getRole();
+
         switch (role) {
             case ADMIN -> {
+                // ========== VISIBILITY CONFIGURATIONS ==========
+                btnDashboard.setVisible(true);
+                btnSessionSchedule.setVisible(true);
                 btnTherapistManage.setVisible(true);
                 btnTherapyCatalog.setVisible(true);
+
                 btnGenerateInvoice.setVisible(false);
-                btnPaymentTracking.setVisible(false);
+                btnPaymentTracking.setVisible(true);
+                lblFinanceHeader.setVisible(true);
+
+                // ========== LAYOUT MANAGEMENT CONFIGURATIONS ==========
+                btnDashboard.setManaged(true);
+                btnSessionSchedule.setManaged(true);
+                btnTherapistManage.setManaged(true);
+                btnTherapyCatalog.setManaged(true);
+
+                btnPaymentTracking.setManaged(true);
+                lblFinanceHeader.setManaged(true);
+                lblFinanceHeader.setManaged(true);
             }
+
             case RECEPTIONIST -> {
-                btnTherapistManage.setVisible(false);
-                btnTherapyCatalog.setVisible(false);
+                // ========== VISIBILITY CONFIGURATIONS ==========
+                btnSessionSchedule.setVisible(true);
                 btnGenerateInvoice.setVisible(true);
                 btnPaymentTracking.setVisible(true);
+                lblFinanceHeader.setVisible(true); // Ensured header reveals cleanly
+
+                btnDashboard.setVisible(false);
+                btnTherapistManage.setVisible(false);
+                btnTherapyCatalog.setVisible(false);
+
+                // ========== LAYOUT MANAGEMENT CONFIGURATIONS ==========
+                btnSessionSchedule.setManaged(true);
+                btnGenerateInvoice.setManaged(true);
+                btnPaymentTracking.setManaged(true);
+                lblFinanceHeader.setManaged(true);
+
+                btnDashboard.setManaged(false);
+                btnTherapistManage.setManaged(false);
+                btnTherapyCatalog.setManaged(false);
             }
+
             default -> {
+                // ========== ABSOLUTE LOCKDOWN FALLBACK MODE ==========
+                // Completely isolates access bounds from unverified context layers
+                btnDashboard.setVisible(false);
+                btnSessionSchedule.setVisible(false);
                 btnTherapistManage.setVisible(false);
                 btnTherapyCatalog.setVisible(false);
                 btnGenerateInvoice.setVisible(false);
                 btnPaymentTracking.setVisible(false);
+                lblFinanceHeader.setVisible(false);
+
+                btnDashboard.setManaged(false);
+                btnSessionSchedule.setManaged(false);
+                btnTherapistManage.setManaged(false);
+                btnTherapyCatalog.setManaged(false);
+                btnGenerateInvoice.setManaged(false);
+                btnPaymentTracking.setManaged(false);
+                lblFinanceHeader.setManaged(false);
             }
         }
 
-        // Set default system entry view dashboard viewport configuration maps
+        // ● Both Roles: Retain unified Read/Write access paths to core Patient Intake Forms natively!
+        btnPatientManage.setVisible(true);
+        btnPatientManage.setManaged(true);
+
+        // Render default entry dashboard viewport screen
         setActiveNavigation(btnPatientManage);
         lblViewTitle.setText("Patient Intake & Clinical Registry");
         loadView("PatientForm.fxml");
@@ -168,6 +222,37 @@ public class DashboardController {
 
     @FXML
     void handleLogOutOnAction(ActionEvent event) {
-        AlertUtil.showInformation("Logout", null, "Logout execution sequence routing will drop context maps here.");
+        boolean confirmed = AlertUtil.showConfirmation(
+                "Exit Session",
+                "Confirm Logout",
+                "Are you sure you want to end your active clinical session?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+            FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/Login.fxml")
+            );
+            Parent loginRoot = loader.load();
+
+            Stage currentStage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+
+            Scene loginScene = new javafx.scene.Scene(loginRoot);
+            currentStage.setScene(loginScene);
+
+            currentStage.centerOnScreen();
+            currentStage.show();
+
+            System.out.println(">> Security Context Terminated: User session dropped successfully.");
+
+        } catch (IOException e) {
+            AlertUtil.showError(
+                    "Navigation Error",
+                    "Session Termination Failed",
+                    "Unable to map resource routing path back to LoginForm.fxml"
+            );
+            e.printStackTrace();
+        }
     }
 }
