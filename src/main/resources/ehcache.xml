@@ -9,20 +9,29 @@
             http://www.ehcache.org/v3/jsr107
             http://www.ehcache.org/schema/ehcache-107-ext.xsd">
 
-    <!-- Enable JCache -->
     <service>
-        <jsr107:defaults enable-management="true"
-                         enable-statistics="true"/>
+        <jsr107:defaults enable-management="true" enable-statistics="true"/>
     </service>
 
-    <!-- Cache region for entity -->
     <cache alias="lk.ijse.theserenitymentalhealththerapycenter.entity.Patient">
         <expiry>
-            <ttl unit="minutes">10</ttl>
-        </expiry>
+            <ttl unit="minutes">10</ttl> </expiry>
         <resources>
-            <heap unit="entries">1000</heap>
-        </resources>
+            <heap unit="entries">1000</heap> </resources>
+    </cache>
+
+    <cache alias="lk.ijse.theserenitymentalhealththerapycenter.entity.Therapist">
+        <expiry>
+            <ttl unit="minutes">10</ttl> </expiry>
+        <resources>
+            <heap unit="entries">500</heap> </resources>
+    </cache>
+
+    <cache alias="lk.ijse.theserenitymentalhealththerapycenter.entity.TherapyProgram">
+        <expiry>
+            <ttl unit="minutes">15</ttl> </expiry>
+        <resources>
+            <heap unit="entries">200</heap> </resources>
     </cache>
 
 </config>
