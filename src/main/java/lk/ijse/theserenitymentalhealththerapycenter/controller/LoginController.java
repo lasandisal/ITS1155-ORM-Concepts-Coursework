@@ -74,7 +74,6 @@ public class LoginController {
             Parent dashboardRoot = loader.load();
 
             DashboardController dashboardController = loader.getController();
-
             dashboardController.configureAccessPrivileges(authenticatedUser);
 
             root.getChildren().clear();
@@ -97,18 +96,29 @@ public class LoginController {
     void togglePasswordVisibility(ActionEvent event) {
         if (passwordField.isVisible()) {
             passwordTextField.setText(passwordField.getText());
+
             passwordTextField.setVisible(true);
             passwordTextField.setManaged(true);
+            passwordTextField.setFocusTraversable(true);
+
             passwordField.setVisible(false);
             passwordField.setManaged(false);
+            passwordField.setFocusTraversable(false);
+
             eyeIcon.setIconLiteral("fas-eye-slash");
+            passwordTextField.requestFocus();
         } else {
             passwordField.setText(passwordTextField.getText());
+
             passwordField.setVisible(true);
             passwordField.setManaged(true);
+            passwordField.setFocusTraversable(true);
             passwordTextField.setVisible(false);
             passwordTextField.setManaged(false);
+            passwordTextField.setFocusTraversable(false);
+
             eyeIcon.setIconLiteral("fas-eye");
+            passwordField.requestFocus();
         }
     }
 

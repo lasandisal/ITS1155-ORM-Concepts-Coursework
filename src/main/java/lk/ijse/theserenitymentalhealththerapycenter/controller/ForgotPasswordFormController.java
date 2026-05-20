@@ -46,8 +46,8 @@ public class ForgotPasswordFormController {
                 if (user.getUsername().equalsIgnoreCase(inputUsername) &&
                         user.getEmail().equalsIgnoreCase(inputEmail)) {
 
-                    // Fallback comparison
-                    if ("SERENITY-76-SECURE".equalsIgnoreCase(inputKeyword)) {
+                    if (user.getRecoveryKeyword() != null &&
+                            user.getRecoveryKeyword().equalsIgnoreCase(inputKeyword)) {
                         targetMatchingAccount = user;
                         break;
                     }

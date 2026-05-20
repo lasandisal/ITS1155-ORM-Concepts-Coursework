@@ -82,8 +82,9 @@
                                         </Button>
                                         <StackPane HBox.hgrow="ALWAYS">
                                             <children>
-                                                <PasswordField fx:id="passwordField" onAction="#btnLoginOnAction" prefHeight="48.0" promptText="Password" style="-fx-background-color: transparent; -fx-text-fill: #2C3E50;" focusTraversable="true" />
-                                                <TextField fx:id="passwordTextField" managed="false" onAction="#btnLoginOnAction" prefHeight="48.0" promptText="Password" style="-fx-background-color: transparent; -fx-text-fill: #2C3E50;" visible="false" focusTraversable="true" />
+                                                <PasswordField fx:id="passwordField" onAction="#btnLoginOnAction" prefHeight="48.0" promptText="Password" style="-fx-background-color: transparent; -fx-text-fill: #2C3E50;" focusTraversable="true" visible="true" managed="true" />
+
+                                                <TextField fx:id="passwordTextField" onAction="#btnLoginOnAction" prefHeight="48.0" promptText="Password" style="-fx-background-color: transparent; -fx-text-fill: #2C3E50;" focusTraversable="false" visible="false" managed="false" />
                                             </children>
                                         </StackPane>
                                     </children>

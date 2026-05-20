@@ -154,7 +154,9 @@
 
                         <Separator orientation="VERTICAL" prefHeight="25.0" style="-fx-opacity: 0.4;" />
 
-                        <HBox alignment="CENTER_LEFT" spacing="8.0" style="-fx-background-color: #F0FDF4; -fx-padding: 6 12; -fx-background-radius: 6; -fx-border-color: #DCFCE7; -fx-border-width: 1;">
+                        <HBox fx:id="paneUserBadge" alignment="CENTER_LEFT" spacing="8.0"
+                              onMouseClicked="#handleOpenProfileSettings"
+                              style="-fx-background-color: #F0FDF4; -fx-padding: 6 12; -fx-background-radius: 6; -fx-border-color: #DCFCE7; -fx-border-width: 1; -fx-cursor: hand;">
                             <children>
                                 <FontIcon iconColor="#16A34A" iconLiteral="fas-user-shield" iconSize="14" />
                                 <Label fx:id="lblLoggedInUser" text="Initializing Context..." textFill="#14532D">

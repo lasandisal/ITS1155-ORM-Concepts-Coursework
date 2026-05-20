@@ -110,10 +110,16 @@ public class UserBOImpl implements UserBO {
             if (user == null || user.getStatus() == CommonStatus.INACTIVE) {
                 throw new LoginException("Update failed: Active user profile context not found.");
             }
-
             user.setFullName(dto.getFullName());
             user.setEmail(dto.getEmail());
             user.setRole(UserRole.valueOf(dto.getRole().name()));
+            user.setRecoveryKeyword(dto.getRecoveryKeyword());
+
+            if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+                String encryptedPassword = PasswordUtil.hashPassword(dto.getPassword());
+                user.setPassword(encryptedPassword);
+                System.out.println(">> Security Core: Cryptographic hash updated for user: " + dto.getUsername());
+            }
 
             boolean isUpdated = userDAO.update(user);
             transaction.commit();

@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -40,7 +41,7 @@ public class DashboardController {
     @FXML private Label lblLoggedInUser;
     @FXML private Label lblFinanceHeader;
 
-    private UserDTO authenticatedUser;
+    private static UserDTO authenticatedUser;
 
     @FXML
     public void initialize() {
@@ -267,5 +268,17 @@ public class DashboardController {
             );
             e.printStackTrace();
         }
+    }
+
+    public static UserDTO getAuthenticatedUserSession() {
+        return authenticatedUser;
+    }
+
+    @FXML
+    void handleOpenProfileSettings(MouseEvent event) {
+        System.out.println(">> Navigation Engine: Loading user profile configuration workspace pane...");
+        setActiveNavigation(null); // Clears sidebar button active style states cleanly
+        lblViewTitle.setText("My Profile Management Settings");
+        loadView("ProfileForm.fxml");
     }
 }
