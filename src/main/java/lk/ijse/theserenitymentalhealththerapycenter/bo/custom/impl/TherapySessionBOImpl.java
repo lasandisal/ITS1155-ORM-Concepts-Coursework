@@ -30,7 +30,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
     private final PatientDAO patientDAO = (PatientDAO) DAOFactory.getInstance().getDAO(DAOType.PATIENT);
     private final TherapyProgramDAO programDAO = (TherapyProgramDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_PROGRAM); // ✅ Connected
 
-    // Symmetrical Configuration Parameters
     private static final LocalTime OPENING_HOUR = LocalTime.of(8, 0);   // 08:00 AM
     private static final LocalTime CLOSING_HOUR = LocalTime.of(18, 0); // 06:00 PM
     private static final long SESSION_BUFFER_MINUTES = 60;             // 1-Hour Time Block Buffer
@@ -42,7 +41,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             throw new SessionScheduleException("Booking Failed: Complete session scheduling details must be supplied.");
         }
 
-        // 1. Validate operating window bounds
         validateBusinessHours(dto.getSessionDateTime());
 
         Session session = FactoryConfiguration.getInstance().getSession();
@@ -51,7 +49,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         try {
             transaction = session.beginTransaction();
 
-            // Load the program from the database to check if it's a group session format dynamically
             TherapyProgram program = programDAO.findById(dto.getProgramId());
             if (program == null) {
                 throw new SessionScheduleException("Booking Failed: Target therapeutic program framework not found.");
@@ -80,7 +77,6 @@ public class TherapySessionBOImpl implements TherapySessionBO {
                         .setParameter("endWindow", endWindow)
                         .uniqueResult() > 0;
             } else {
-                // Standard 1-on-1 clash verification rule
                 hasOverlap = sessionDAO.hasOverlappingSession(
                         dto.getTherapistId(), dto.getPatientId(), startWindow, endWindow, null
                 );

@@ -19,14 +19,10 @@ public class TherapySessionDetailCardController {
     @FXML private Label lblStatus;
     @FXML private Button btnClose;
 
-    /**
-     * Binds incoming TherapySession DTO properties into summary card items.
-     */
+
     public void setSessionData(TherapySessionDTO session) {
         if (session != null) {
             lblId.setText(String.valueOf(session.getId()));
-
-            // Build descriptions with fallback options if relational models are detached
             lblPatientName.setText(session.getPatientName() != null ? session.getPatientName() : "ID: " + session.getPatientId());
             lblTherapistName.setText(session.getTherapistName() != null ? session.getTherapistName() : "ID: " + session.getTherapistId());
             lblProgramName.setText(session.getProgramName() != null ? session.getProgramName() : "Code: " + session.getProgramId());

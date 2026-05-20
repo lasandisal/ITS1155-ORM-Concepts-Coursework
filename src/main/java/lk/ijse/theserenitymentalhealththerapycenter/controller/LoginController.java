@@ -56,10 +56,7 @@ public class LoginController {
         }
 
         try {
-            // Validate username and password using BCrypt via the User BO layer
             UserDTO authenticatedUser = userBO.authenticate(username, password);
-
-            // ✅ STRATEGIC CHECK: Verify that the credentials match the selected login role
             if (authenticatedUser.getRole() != selectedRole) {
                 AlertUtil.showWarning("Access Denied", "Role Mismatch Profile Error",
                         "The credentials provided do not map to the '" + selectedRole.name() + "' profile domain.");
@@ -68,7 +65,6 @@ public class LoginController {
 
             AlertUtil.showSuccess("Login Successful", null, "Welcome back, " + authenticatedUser.getFullName() + "!");
 
-            // ✅ BEST PRACTICE: Forward-Injecting Session state values through the Loader instantiation pipe
             URL resource = getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/Dashboard.fxml");
             if (resource == null) {
                 throw new IOException("FXML layout compilation resource path entry target missing: Dashboard.fxml");
@@ -77,13 +73,10 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(resource);
             Parent dashboardRoot = loader.load();
 
-            // Extract the active instance of the controller directly from the pipeline
             DashboardController dashboardController = loader.getController();
 
-            // Pass user attributes and initialize sidebar visibility metrics
             dashboardController.configureAccessPrivileges(authenticatedUser);
 
-            // Swap out primary window screen layout boundaries completely
             root.getChildren().clear();
             root.getChildren().add(dashboardRoot);
 
@@ -122,7 +115,6 @@ public class LoginController {
     @FXML
     void handleForgotPasswordLink(ActionEvent event) {
         try {
-            // Assuming 'rootLoginPane' is your Login screen's root AnchorPane identifier variable mapping
             System.out.println(">> Routing Engine: Swapping screen state context to ForgotPasswordForm.fxml...");
             NavigationUtil.navigateTo(root, "ForgotPasswordForm.fxml");
         } catch (IOException e) {
@@ -134,7 +126,6 @@ public class LoginController {
     @FXML
     void handleRegisterLink(ActionEvent event) {
         try {
-            // Assuming 'rootLoginPane' or similar is your Login screen's base container AnchorPane anchor variable link field
             System.out.println(">> Routing Engine: Mapping view stack context to registration registration...");
             NavigationUtil.navigateTo(root, "RegisterForm.fxml");
         } catch (IOException e) {

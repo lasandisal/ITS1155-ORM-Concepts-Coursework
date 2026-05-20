@@ -16,17 +16,12 @@ import java.util.Map;
 
 public class ReportPrintUtil {
 
-    /**
-     * Compiles data list parameters, asks user to export an external hard backup copy on disk,
-     * and shows a pre-scaled preview window at a comfortable 50% scale.
-     */
     public static void generateFinancialReport(List<PaymentDTO> paymentRecords, String totalRevenue, String sessionUser) {
         if (paymentRecords == null || paymentRecords.isEmpty()) return;
 
         try {
             System.out.println(">> Report Utility pipeline: Initializing transactional rows down to source stream...");
 
-            // 1. Dynamic Classpath Asset Stream Loader
             InputStream reportStream = ReportPrintUtil.class.getResourceAsStream(
                     "/lk/ijse/theserenitymentalhealththerapycenter/reports/serenity_financial_report.jrxml"
             );
@@ -35,21 +30,15 @@ public class ReportPrintUtil {
                 throw new JRException("Source template file (serenity_financial_report.jrxml) not found in the resource path mapping.");
             }
 
-            // 2. Bind Parameter Configuration Maps
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("TotalRevenue", totalRevenue);
             parameters.put("GeneratedUser", sessionUser);
 
-            // 3. Wrap DTO Collection Data into a Jasper Engine source instance
             JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(paymentRecords);
 
-            // 4. Compile and fill raw structural boundaries into a displayable Canvas layout
             JasperReport compiledReport = JasperCompileManager.compileReport(reportStream);
             JasperPrint jasperPrint = JasperFillManager.fillReport(compiledReport, parameters, beanCollectionDataSource);
 
-            // =========================================================================
-            // ✅ DYNAMIC USER PERSISTENCE INTERFACE PROMPT
-            // =========================================================================
             boolean wantToSaveBackup = AlertUtil.showConfirmation(
                     "Export Action",
                     "Save Financial Report Backup?",
@@ -60,31 +49,25 @@ public class ReportPrintUtil {
                 String projectRoot = System.getProperty("user.dir");
                 String outputDirectoryPath = projectRoot + File.separator + "financial_reports" + File.separator;
 
-                // Build localized directory folder on disk workspace if missing
                 File directory = new File(outputDirectoryPath);
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }
 
-                // Append an immutable unique timestamp suffix to keep histories from overwriting each other
                 String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                 String targetPdfFileName = "Financial_Audit_" + timeStamp + ".pdf";
                 String fullSavePath = outputDirectoryPath + targetPdfFileName;
 
-                // Silently write to hard storage
                 JasperExportManager.exportReportToPdfFile(jasperPrint, fullSavePath);
                 System.out.println(">> Audit System Archive: Hardcopy saved to local tracking stack: " + fullSavePath);
 
                 AlertUtil.showInformation("Export Complete", "Document Persisted", "Financial statement spreadsheet written to folder destination cleanly:\n" + fullSavePath);
             }
 
-            // 5. Initialize Window Container Preview Frame
             JasperViewer viewer = new JasperViewer(jasperPrint, false);
             viewer.setTitle("The Serenity Center - Financial Audit Ledger Viewer Portal");
 
-            // =========================================================================
-            // ✅ REFLECTION ENGINE WORKAROUND: FORCE 50% VIEW ZOOM STATE
-            // =========================================================================
+
             if (viewer.getContentPane() != null) {
                 for (java.awt.Component comp : viewer.getContentPane().getComponents()) {
                     if (comp.getClass().getName().endsWith("JRViewer")) {
@@ -99,7 +82,6 @@ public class ReportPrintUtil {
                     }
                 }
             }
-            // =========================================================================
 
             viewer.setVisible(true);
 

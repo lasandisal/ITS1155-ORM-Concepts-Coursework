@@ -15,7 +15,7 @@
                          enable-statistics="true"/>
     </service>
 
-    <!-- Cache region for your entity -->
+    <!-- Cache region for entity -->
     <cache alias="lk.ijse.theserenitymentalhealththerapycenter.entity.Patient">
         <expiry>
             <ttl unit="minutes">10</ttl>

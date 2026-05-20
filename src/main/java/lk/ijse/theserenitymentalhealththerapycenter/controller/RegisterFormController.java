@@ -12,7 +12,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.NavigationUtil;
-import lk.ijse.theserenitymentalhealththerapycenter.util.ValidationUtil; // ✅ Import clean utilities
+import lk.ijse.theserenitymentalhealththerapycenter.util.ValidationUtil;
 
 public class RegisterFormController {
 
@@ -51,8 +51,6 @@ public class RegisterFormController {
         freshUserDto.setPassword(txtPassword.getText());
         freshUserDto.setRole(cmbRole.getValue());
         freshUserDto.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
-
-        // ✅ CAPTURE KEYWORD: Map the input keyword to the DTO payload
         freshUserDto.setRecoveryKeyword(txtKeyword.getText().trim());
 
         try {
@@ -83,18 +81,16 @@ public class RegisterFormController {
     }
 
     private boolean validateRegistrationInputs() {
-        // ✅ BEST PRACTICE: Using clean centralized methods from ValidationUtil
         if (!ValidationUtil.isRequiredFieldFilled(txtFullName.getText()) ||
                 !ValidationUtil.isRequiredFieldFilled(txtUsername.getText()) ||
                 !ValidationUtil.isRequiredFieldFilled(txtEmail.getText()) ||
                 !ValidationUtil.isRequiredFieldFilled(txtPassword.getText()) ||
-                !ValidationUtil.isRequiredFieldFilled(txtKeyword.getText())) { // ✅ VALIDATE KEYWORD
+                !ValidationUtil.isRequiredFieldFilled(txtKeyword.getText())) {
 
             AlertUtil.showWarning("Input Validation", "Mandatory Fields Missing", "All registration parameters, including the recovery keyword, are required.");
             return false;
         }
 
-        // ✅ BEST PRACTICE: Swapped hardcoded regex string logic for centralized pattern checks
         if (!ValidationUtil.isValidEmail(txtEmail.getText())) {
             AlertUtil.showWarning("Validation Error", "Invalid Email String Sequence", "Please pass a correctly structured clinical communication email address.");
             return false;

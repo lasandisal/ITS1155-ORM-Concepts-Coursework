@@ -26,7 +26,6 @@ public class AlertUtil {
         alert.setHeaderText(header);
         alert.setContentText(content);
 
-        // Ensure the dialog styles stay on top of the main application window context
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.setAlwaysOnTop(true);
 

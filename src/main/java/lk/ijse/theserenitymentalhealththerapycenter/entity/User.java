@@ -27,12 +27,10 @@ public class User {
     @Column(length = 100)
     private String email;
 
-    // FIX: Point directly to your shared DTO UserRole enum type
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    // FIX: Point directly to your shared CommonStatus enum type
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private CommonStatus status = CommonStatus.ACTIVE;

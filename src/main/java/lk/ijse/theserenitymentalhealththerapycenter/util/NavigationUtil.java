@@ -9,9 +9,6 @@ import java.net.URL;
 
 public class NavigationUtil {
 
-    /**
-     * Swaps the view inside an active AnchorPane container.
-     */
     public static void navigateTo(AnchorPane contextPane, String fxmlPath) throws IOException {
         URL resource = NavigationUtil.class.getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/" + fxmlPath);
         if (resource == null) {
@@ -21,7 +18,6 @@ public class NavigationUtil {
         contextPane.getChildren().clear();
         contextPane.getChildren().add(root);
 
-        // Ensure the loaded view stretches completely across the parent container anchor anchors
         AnchorPane.setTopAnchor(root, 0.0);
         AnchorPane.setBottomAnchor(root, 0.0);
         AnchorPane.setLeftAnchor(root, 0.0);

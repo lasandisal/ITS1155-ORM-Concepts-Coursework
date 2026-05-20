@@ -12,17 +12,12 @@ import java.util.stream.Collectors;
 
 public class MailClientUtil {
 
-    /**
-     * Aggregates recipient email addresses, sets them to system clipboard,
-     * and triggers default web browser straight to Gmail's composition window using safe BCC fields.
-     */
     public static void launchGmailBccComposer(List<String> rawEmailList, String customSubject, String customMessageBody) {
         if (rawEmailList == null || rawEmailList.isEmpty()) {
             AlertUtil.showWarning("Communication Error", "No Recipients Selected", "The target list contains zero active client records.");
             return;
         }
 
-        // Sanitize and isolate individual unique email addresses
         String bccAggregatorString = rawEmailList.stream()
                 .filter(email -> email != null && email.contains("@"))
                 .distinct()
@@ -34,11 +29,8 @@ public class MailClientUtil {
         }
 
         try {
-            // Backup to clipboard for seamless user fallback assistance
             StringSelection clipboardPayload = new StringSelection(bccAggregatorString);
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(clipboardPayload, null);
-
-            // Encode text inputs cleanly into formal URI query strings
             String encodedSubject = URLEncoder.encode(customSubject, StandardCharsets.UTF_8);
             String encodedBody = URLEncoder.encode(customMessageBody, StandardCharsets.UTF_8);
             String encodedBcc = URLEncoder.encode(bccAggregatorString, StandardCharsets.UTF_8);

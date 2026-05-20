@@ -77,7 +77,6 @@ public class UserBOImpl implements UserBO {
 
             User user = userDAO.findByUsername(username);
 
-            // ✅ FIXED: Using specialized LoginException over general registration errors
             if (user == null) {
                 throw new LoginException("Login failed: Invalid credentials.");
             }

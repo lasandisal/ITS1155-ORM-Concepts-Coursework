@@ -39,8 +39,6 @@ public class PaymentFormController {
     @FXML private Button btnRefresh;
     @FXML private Button btnSelectAll;
     @FXML private Button btnSendNotification;
-
-    // ✅ Updated component type mappings to explicitly hold Strings safely
     @FXML private ComboBox<String> cmbPaymentStatusFilter;
     @FXML private ComboBox<String> cmbProgramFilter;
 
@@ -68,7 +66,7 @@ public class PaymentFormController {
     @FXML
     public void initialize() {
         configureColumns();
-        setupFiltersComboData(); // ✅ Dynamically loads database items now
+        setupFiltersComboData();
         loadLedgerRecordsData();
 
         cmbPaymentStatusFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyDataFilteringPredicate());
@@ -92,14 +90,10 @@ public class PaymentFormController {
         tblPayment.setEditable(true);
     }
 
-    // =========================================================================
-    // ✅ PURE DATABASE COMBOBOX INITIALIZATION
-    // =========================================================================
     private void setupFiltersComboData() {
         try {
-            // 1. Populate Programs dropdown from your persistent Hibernate catalog list
             ObservableList<String> programOptions = FXCollections.observableArrayList();
-            programOptions.add("All Programs"); // Baseline reset option
+            programOptions.add("All Programs");
 
             List<TherapyProgramDTO> activeDatabasePrograms = programBO.getAllActivePrograms();
             if (activeDatabasePrograms != null) {
@@ -110,11 +104,10 @@ public class PaymentFormController {
             cmbProgramFilter.setItems(programOptions);
             cmbProgramFilter.setValue("All Programs");
 
-            // 2. Populate Status values dynamically straight from the backend Entity Enum definition definitions
             ObservableList<String> statusOptions = FXCollections.observableArrayList();
             statusOptions.add("All Statuses");
             for (Payment.Status systemStatus : Payment.Status.values()) {
-                statusOptions.add(systemStatus.name()); // Pulls SUCCESS, FAILED, PENDING right out of your entity enum profile mapping
+                statusOptions.add(systemStatus.name());
             }
             cmbPaymentStatusFilter.setItems(statusOptions);
             cmbPaymentStatusFilter.setValue("All Statuses");
@@ -125,9 +118,6 @@ public class PaymentFormController {
         }
     }
 
-    // =========================================================================
-    // ✅ DYNAMIC PURE PREDICATE FILTER COUPLING
-    // =========================================================================
     private void applyDataFilteringPredicate() {
         if (filteredDataList == null) return;
 
@@ -138,16 +128,13 @@ public class PaymentFormController {
         filteredDataList.setPredicate(row -> {
             if (row == null) return false;
 
-            // 1. Unified text filter matches across unique transaction IDs and Patient profile descriptions
             boolean matchSearch = searchKeyword.isEmpty() ||
                     row.getPatientName().toLowerCase().contains(searchKeyword) ||
                     row.getInvoiceNumber().toLowerCase().contains(searchKeyword);
 
-            // 2. Direct string-match join logic maps against DB values
             boolean matchStatus = statusFilterValue == null || "All Statuses".equalsIgnoreCase(statusFilterValue) ||
                     statusFilterValue.equalsIgnoreCase(row.getStatus());
 
-            // 3. Exact matching logic handles dynamic strings seamlessly
             boolean matchProgram = programFilterValue == null || "All Programs".equalsIgnoreCase(programFilterValue) ||
                     (row.getProgramName() != null && row.getProgramName().equalsIgnoreCase(programFilterValue));
 
@@ -250,11 +237,9 @@ public class PaymentFormController {
 
     @FXML
     void tblPaymentOnMouseClicked(MouseEvent event) {
-        // Intercept row targets out of user interaction contexts
         PaymentDisplayTM selectedRowItem = tblPayment.getSelectionModel().getSelectedItem();
 
         if (selectedRowItem != null) {
-            // Check for double click execution passes
             if (event.getClickCount() == 2) {
                 openPaymentDetailModalCard(selectedRowItem);
             }
@@ -266,11 +251,8 @@ public class PaymentFormController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/PaymentDetailCard.fxml"));
             AnchorPane modalPane = loader.load();
 
-            // Inject the data context right into our newly designed controller layer
             PaymentDetailCardController controller = loader.getController();
             controller.setPaymentDetails(selectedRecord);
-
-            // Establish stage and configure strict overlay modality options
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.initStyle(StageStyle.UTILITY);
@@ -278,8 +260,6 @@ public class PaymentFormController {
             dialogStage.setScene(new Scene(modalPane));
             dialogStage.setResizable(false);
             dialogStage.centerOnScreen();
-
-            // Show window and lock context loop execution thread paths safely
             dialogStage.showAndWait();
 
         } catch (IOException e) {

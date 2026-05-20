@@ -22,8 +22,6 @@ public class MappingUtil {
         user.setEmail(dto.getEmail());
         user.setRole(dto.getRole());
         user.setStatus(dto.getStatus());
-
-        // ✅ ADDED: Map recovery keyword straight to entity field
         user.setRecoveryKeyword(dto.getRecoveryKeyword());
 
         return user;
@@ -34,12 +32,12 @@ public class MappingUtil {
         return new UserDTO(
                 entity.getId(),
                 entity.getUsername(),
-                null, // Clear out password text for security transfers
+                null,
                 entity.getFullName(),
                 entity.getEmail(),
                 entity.getRole(),
                 entity.getStatus(),
-                entity.getRecoveryKeyword() // ✅ ADDED: Map keyword directly to constructor parameters list
+                entity.getRecoveryKeyword()
         );
     }
 
@@ -239,7 +237,6 @@ public class MappingUtil {
             payment.setTherapyProgram(program);
         }
 
-        // ✅ ADDED: Instantiates a stub proxy User reference for Hibernate to match foreign keys
         if (dto.getUserId() != null) {
             User user = new User();
             user.setId(dto.getUserId());
@@ -272,7 +269,6 @@ public class MappingUtil {
             dto.setProgramName(entity.getTherapyProgram().getName());
         }
 
-        // ✅ ADDED: Maps the record data safely back out for display views
         if (entity.getManagedBy() != null) {
             dto.setUserId(entity.getManagedBy().getId());
             dto.setUsername(entity.getManagedBy().getUsername());

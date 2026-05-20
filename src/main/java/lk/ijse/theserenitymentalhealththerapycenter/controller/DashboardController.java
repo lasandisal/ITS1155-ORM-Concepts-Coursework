@@ -37,10 +37,7 @@ public class DashboardController {
 
     @FXML private Label lblViewTitle;
     @FXML private Label lblSystemTime;
-
-    // ✅ Tracks the top global layout user session context badge wrapper
     @FXML private Label lblLoggedInUser;
-
     @FXML private Label lblFinanceHeader;
 
     private UserDTO authenticatedUser;
@@ -59,14 +56,11 @@ public class DashboardController {
         clock.play();
     }
 
-    /**
-     * Configure security visibility profiles dynamically matching corporate policy constraints.
-     */
+
     public void configureAccessPrivileges(UserDTO activeUser) {
         if (activeUser == null) return;
         this.authenticatedUser = activeUser;
 
-        // ✅ FIXED: Centralized context injection sets label text value on login redirection
         lblLoggedInUser.setText(activeUser.getFullName() + " (" + activeUser.getRole().name() + ")");
 
         UserRole role = activeUser.getRole();
@@ -91,7 +85,6 @@ public class DashboardController {
                 btnGenerateInvoice.setManaged(false);
                 btnPaymentTracking.setManaged(true);
                 lblFinanceHeader.setManaged(true);
-
 
                 setActiveNavigation(btnDashboard);
                 lblViewTitle.setText("Overview Insights Dashboard");
@@ -149,7 +142,7 @@ public class DashboardController {
             }
         }
 
-        // Both verified active roles require ongoing unrestricted access paths to manage client logs!
+        // Both verified active roles
         btnPatientManage.setVisible(true);
         btnPatientManage.setManaged(true);
     }
@@ -229,10 +222,7 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/InvoiceForm.fxml"));
             Parent root = loader.load();
 
-            // ✅ Grab the controller instance right after loading the FXML sheet layout bounds
             InvoiceFormController controller = loader.getController();
-
-            // Inject the user profile tracked inside DashboardController!
             controller.setAuthenticatedUser(this.authenticatedUser);
 
             contentArea.getChildren().clear();

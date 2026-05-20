@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "patients")
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE) // Enable second-level caching for this entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

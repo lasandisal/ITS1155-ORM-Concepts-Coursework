@@ -19,6 +19,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapySessionBO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapySessionDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
+import lk.ijse.theserenitymentalhealththerapycenter.util.ReportPrintUtil;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -48,34 +49,14 @@ public class OverviewFormController {
         loadHeaderBannerStatMetrics();
         populateAnalyticsCharts();
 
-        // =========================================================================
-        // 📊 ✅ FIX 1: OPTIMIZE X-Y BAR CHART AXIS TEXT SPACING
-        // =========================================================================
-        // Get the category axis component out of your BarChart
         CategoryAxis xAxis = (CategoryAxis) barChartSessionVolumes.getXAxis();
-
-        // Forces categories to tilt cleanly at a 45-degree angle instead of staying flat
         xAxis.setTickLabelRotation(-30);
-
-        // Prevents layout gaps by allowing labels to print even near container edges
         xAxis.setGapStartAndEnd(true);
-
-        // =========================================================================
-        // 🍕 ✅ FIX 2: RE-STABILIZE PIE CHART OVERLAYS & LEGENDS
-        // =========================================================================
-        // Forces the item names legend box to render safely along the bottom margin canvas
         pieChartRevenueShare.setLegendSide(javafx.geometry.Side.BOTTOM);
-
-        // Forces item descriptions to stay pinned directly onto individual slices
         pieChartRevenueShare.setLabelsVisible(true);
-
-        // Restricts default engine margins to scale chart circles back up to maximum size bounds
         pieChartRevenueShare.setStartAngle(90);
     }
 
-    /**
-     * Queries database row footprints live to fill your top status metric summary blocks.
-     */
     private void loadHeaderBannerStatMetrics() {
         try {
             int patientCount = patientBO.getAllActivePatients().size();
@@ -86,13 +67,11 @@ public class OverviewFormController {
             lblTotalPatients.setText(String.valueOf(patientCount));
             lblTotalTherapists.setText(String.valueOf(therapistCount));
 
-            // Count only sessions allocated for today's date
             long todayCount = allSessions.stream()
                     .filter(s -> s.getSessionDateTime() != null && s.getSessionDateTime().toLocalDate().equals(LocalDate.now()))
                     .count();
             lblTodaySessions.setText(String.valueOf(todayCount));
 
-            // Calculate aggregated successful transaction amounts
             double grossRevenueSum = allPayments.stream()
                     .filter(p -> p.getStatus() != null && ("SUCCESS".equalsIgnoreCase(p.getStatus().name()) || "PAID".equalsIgnoreCase(p.getStatus().name())))
                     .mapToDouble(PaymentDTO::getAmount)
@@ -106,9 +85,6 @@ public class OverviewFormController {
         }
     }
 
-    /**
-     * Refreshes chart datasets completely with fresh groupings parsed directly from the database layer.
-     */
     private void populateAnalyticsCharts() {
         try {
             barChartSessionVolumes.getData().clear();
@@ -117,7 +93,6 @@ public class OverviewFormController {
             List<TherapySessionDTO> sessionRecords = sessionBO.getAllSessionsWithFullDetails();
             List<PaymentDTO> revenueRecords = paymentBO.getAllTransactionsLog();
 
-            // 1. Map counts across individual program categories to feed the X-Y BarChart
             Map<String, Integer> programSessionMaps = new HashMap<>();
             for (TherapySessionDTO session : sessionRecords) {
                 String programName = session.getProgramName() != null ? session.getProgramName() : "General Clinic";
@@ -131,7 +106,6 @@ public class OverviewFormController {
             }
             barChartSessionVolumes.getData().add(sessionSeries);
 
-            // 2. Map weight percentages across programs to feed the PieChart revenue ratios
             Map<String, Double> programRevenueMaps = new HashMap<>();
             double totalRevenueSum = 0;
 
@@ -166,18 +140,14 @@ public class OverviewFormController {
     @FXML
     void btnGenerateReportOnAction(ActionEvent event) {
         try {
-            // 1. Fetch live historical transactions straight out of your database BO layer
             List<PaymentDTO> activeRecordsLog = paymentBO.getAllTransactionsLog();
 
-            // 2. Defensive Check: Prevent empty compilation tasks from throwing runtime bugs
             if (activeRecordsLog == null || activeRecordsLog.isEmpty()) {
                 AlertUtil.showWarning("Report Engine", "Export Aborted", "The active ledger sheets contain no transaction history records to build an export layout map.");
                 return;
             }
 
-            // 3. Delegate execution flow directly to your secure printing processing utility layer
-            // Injects live ledger sheets array lists, total calculated header strings, and auditor stamps
-            lk.ijse.theserenitymentalhealththerapycenter.util.ReportPrintUtil.generateFinancialReport(
+            ReportPrintUtil.generateFinancialReport(
                     activeRecordsLog,
                     lblMonthlyRevenue.getText(),
                     "SYSTEM_ADMIN"
@@ -188,5 +158,4 @@ public class OverviewFormController {
             AlertUtil.showError("System Exception", "Task Interrupted", "Unexpected system drop error inside UI frame logic: " + e.getMessage());
         }
     }
-    // =========================================================================
 }

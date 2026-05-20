@@ -19,10 +19,6 @@ public class PaymentDetailCardController {
     @FXML private Label lblStatus;
     @FXML private Button btnClose;
 
-    /**
-     * Binds selection properties out of the UI presentation wrapper model
-     * to render clear summary strings inside the labels.
-     */
     public void setPaymentDetails(PaymentDisplayTM selectedPayment) {
         if (selectedPayment != null) {
             lblInvoiceNo.setText(selectedPayment.getInvoiceNumber());
@@ -33,11 +29,6 @@ public class PaymentDetailCardController {
             lblDate.setText(selectedPayment.getPaymentDate());
             lblAmount.setText(String.format("LKR %,.2f", selectedPayment.getAmount()));
             lblStatus.setText(selectedPayment.getStatus());
-
-            // =========================================================================
-            // ✅ CLEAN STYLE CLASS INJECTION
-            // =========================================================================
-            // Flush any existing style classes from the node to prevent style bleeding overrides
             lblStatus.getStyleClass().removeAll("status-badge-success", "status-badge-danger", "status-badge-warning");
 
             String statusStr = selectedPayment.getStatus();
@@ -48,7 +39,6 @@ public class PaymentDetailCardController {
             } else {
                 lblStatus.getStyleClass().add("status-badge-warning");
             }
-            // =========================================================================
         }
     }
 

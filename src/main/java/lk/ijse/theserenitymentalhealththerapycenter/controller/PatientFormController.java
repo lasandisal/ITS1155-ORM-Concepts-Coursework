@@ -37,7 +37,7 @@ public class PatientFormController {
 
     @FXML private Button btnClear;
     @FXML private Button btnDelete;
-    @FXML private Button btnSave; // Single button text dynamically flips: "Save Intake" / "Update Profile"
+    @FXML private Button btnSave;
 
     @FXML private TableColumn<PatientDTO, String> colEmail;
     @FXML private TableColumn<PatientDTO, Long> colId;
@@ -186,7 +186,6 @@ public class PatientFormController {
     void txtSearchProgramOnKeyReleased(KeyEvent event) {
         String filterQuery = txtSearchProgram.getText().trim();
 
-        // When user types and hits ENTER, grab top record result and render separate modal card view
         if (event.getCode() == KeyCode.ENTER && !tblPatient.getItems().isEmpty()) {
             PatientDTO topMatchedPatient = tblPatient.getItems().get(0);
             openPatientDetailCard(topMatchedPatient);

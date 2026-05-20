@@ -34,7 +34,7 @@ public class TherapistFormController {
     private final ObservableList<TherapistDTO> therapistList =
             FXCollections.observableArrayList();
 
-    private TherapistDTO selectedTherapist; // Unified class state reference variable
+    private TherapistDTO selectedTherapist;
 
     @FXML private Button btnClear;
     @FXML private Button btnDelete;

@@ -45,7 +45,6 @@ public class SessionFormController {
     @FXML private Button btnCancel;
     @FXML private Button btnClear;
 
-    // ✅ FIXED TYPES: Changed from raw wrappers (Long/String) to hold full rich DTO profiles safely
     @FXML private ComboBox<PatientDTO> cmbPatientId;
     @FXML private ComboBox<TherapyProgramDTO> cmbProgramId;
     @FXML private ComboBox<SessionStatus> cmbSessionStatus;
@@ -70,7 +69,6 @@ public class SessionFormController {
 
     private final ObservableList<TherapySessionDTO> sessionList = FXCollections.observableArrayList();
 
-    // In-Memory cache sheets used to easily match targets during row selection mutations
     private List<PatientDTO> activePatientsCache;
     private List<TherapistDTO> activeTherapistsCache;
     private List<TherapyProgramDTO> activeProgramsCache;
@@ -80,7 +78,7 @@ public class SessionFormController {
     @FXML
     public void initialize() {
         initializeTableColumns();
-        setupComboBoxConverters(); // ✅ Configures clean readable profile labels
+        setupComboBoxConverters();
         loadAllChoiceSelectors();
         loadAllScheduledSessions();
     }
@@ -94,23 +92,17 @@ public class SessionFormController {
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
-    // =========================================================================
-    // ✅ TYPE-SAFE STRING CONVERTER MAPPINGS (BEST PRACTICE)
-    // =========================================================================
     private void setupComboBoxConverters() {
-        // 1. Patient label parsing conversion rule (e.g., "1001 - Lasandi Uvindya")
         cmbPatientId.setConverter(new StringConverter<>() {
             @Override public String toString(PatientDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
             @Override public PatientDTO fromString(String string) { return null; }
         });
 
-        // 2. Therapist label parsing conversion rule (e.g., "5 - Dr. Fernando")
         cmbTherapistId.setConverter(new StringConverter<>() {
             @Override public String toString(TherapistDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
             @Override public TherapistDTO fromString(String string) { return null; }
         });
 
-        // 3. Program label parsing conversion rule (e.g., "PROG-CBT - Cognitive Behavioral")
         cmbProgramId.setConverter(new StringConverter<>() {
             @Override public String toString(TherapyProgramDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
             @Override public TherapyProgramDTO fromString(String string) { return null; }
@@ -165,7 +157,6 @@ public class SessionFormController {
             return;
         }
 
-        // ✅ Extracting structural primary keys straight out of the mapped combo object models
         TherapySessionDTO dto = new TherapySessionDTO();
         dto.setPatientId(cmbPatientId.getValue().getId());
         dto.setTherapistId(cmbTherapistId.getValue().getId());
@@ -237,8 +228,6 @@ public class SessionFormController {
         if (selectedSession != null) {
             selectedSessionId = selectedSession.getId();
 
-            // ========== ✅ DYNAMIC IN-MEMORY RE-SELECTION HOOKS ==========
-            // Loops cache profiles to select full matching objects inside dropdown trees smoothly
             if (activePatientsCache != null) {
                 activePatientsCache.stream()
                         .filter(p -> p.getId().equals(selectedSession.getPatientId()))
@@ -256,7 +245,6 @@ public class SessionFormController {
                         .filter(tp -> tp.getId().equals(selectedSession.getProgramId()))
                         .findFirst().ifPresent(cmbProgramId::setValue);
             }
-            // =========================================================
 
             dtSessionDate.setValue(selectedSession.getSessionDateTime().toLocalDate());
             txtSessionTime.setText(selectedSession.getSessionDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));

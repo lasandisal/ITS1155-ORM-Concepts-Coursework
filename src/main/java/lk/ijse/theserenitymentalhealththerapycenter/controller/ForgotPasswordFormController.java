@@ -25,7 +25,7 @@ public class ForgotPasswordFormController {
     @FXML private Hyperlink lnkBackToLogin;
     @FXML private TextField txtEmail;
     @FXML private TextField txtUsername;
-    @FXML private TextField txtKeyword; // ✅ Added tracking link field hook
+    @FXML private TextField txtKeyword;
 
     private final UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOType.USER);
 
@@ -46,8 +46,7 @@ public class ForgotPasswordFormController {
                 if (user.getUsername().equalsIgnoreCase(inputUsername) &&
                         user.getEmail().equalsIgnoreCase(inputEmail)) {
 
-                    // Assuming your User DTO/Entity model tracks a recovery phrase.
-                    // Fallback comparison: You can hardcode a master admin center keyword like "SERENITY-76-SECURE"
+                    // Fallback comparison
                     if ("SERENITY-76-SECURE".equalsIgnoreCase(inputKeyword)) {
                         targetMatchingAccount = user;
                         break;
@@ -58,9 +57,6 @@ public class ForgotPasswordFormController {
             if (targetMatchingAccount != null) {
                 System.out.println(">> Security Core: Secret key authorization matched successfully.");
 
-                // =========================================================================
-                // 🔐 POP UP FAST RESET INTERFACE (Best Practice Desktop Workaround)
-                // =========================================================================
                 TextInputDialog passwordDialog = new TextInputDialog();
                 passwordDialog.setTitle("Credential Security Engine");
                 passwordDialog.setHeaderText("Identity Verified Securely");
@@ -71,7 +67,6 @@ public class ForgotPasswordFormController {
                 if (dialogResult.isPresent() && !dialogResult.get().trim().isEmpty()) {
                     String cleanNewPassword = dialogResult.get().trim();
 
-                    // Mutate entry data layers
                     targetMatchingAccount.setPassword(cleanNewPassword);
                     boolean isProfileUpdated = userBO.updateUserProfile(targetMatchingAccount);
 

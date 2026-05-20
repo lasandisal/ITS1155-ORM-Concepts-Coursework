@@ -14,7 +14,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapyProgramBO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapyProgramDTO;
-import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO; // ✅ Imported for session tracking
+import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.InvoicePrintUtil;
 
@@ -40,19 +40,11 @@ public class InvoiceFormController {
     private List<TherapyProgramDTO> programList;
     private final ObservableList<PaymentDTO> paymentLogList = FXCollections.observableArrayList();
 
-    // =========================================================================
-    // ✅ ACTIVE SESSION USER STORAGE FIELD
-    // =========================================================================
     private UserDTO authenticatedUser;
 
-    /**
-     * Setter method invoked by your navigation center/DashboardController
-     * to bind the logged-in employee context dynamically.
-     */
     public void setAuthenticatedUser(UserDTO user) {
         this.authenticatedUser = user;
     }
-    // =========================================================================
 
     @FXML
     public void initialize() {
@@ -106,7 +98,6 @@ public class InvoiceFormController {
 
     @FXML
     void btnPayPrintOnAction(ActionEvent event) {
-        // ✅ SAFETY GUARD: Prevent processing if navigation injection was completely skipped
         if (authenticatedUser == null) {
             AlertUtil.showError("Security Error", "Session Missing", "Cannot process payment. No active staff session detected.");
             return;
@@ -129,14 +120,8 @@ public class InvoiceFormController {
         paymentDTO.setProgramId(selectedProgram.getId());
         paymentDTO.setProgramName(selectedProgram.getName());
         paymentDTO.setAmount(selectedProgram.getFee());
-
-        // =========================================================================
-        // ✅ CRITICAL AUDIT LINK INJECTION
-        // =========================================================================
-        // Securely binds the active user's ID to the business payload container
         paymentDTO.setUserId(authenticatedUser.getId());
         paymentDTO.setUsername(authenticatedUser.getUsername());
-        // =========================================================================
 
         try {
             boolean success = paymentBO.processUpfrontPayment(paymentDTO);

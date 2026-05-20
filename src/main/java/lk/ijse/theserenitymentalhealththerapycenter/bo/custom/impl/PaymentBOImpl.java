@@ -32,7 +32,6 @@ public class PaymentBOImpl implements PaymentBO {
 
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
-        // ✅ ADDED VALIDATION: Guarantee audit compliance criteria right away
         if (dto.getUserId() == null) {
             throw new PaymentException("Payment Failed: Active handling staff member session must be specified for logging.");
         }
@@ -53,7 +52,6 @@ public class PaymentBOImpl implements PaymentBO {
 
             Patient patient = patientDAO.findById(dto.getPatientId());
             TherapyProgram program = programDAO.findById(dto.getProgramId());
-            // ✅ ADDED LOOKUP: Locate the managing user entity in the database session cache
             User staffUser = userDAO.findById(dto.getUserId());
 
             if (patient == null) {
@@ -73,7 +71,7 @@ public class PaymentBOImpl implements PaymentBO {
             Payment payment = MappingUtil.toPaymentEntity(dto);
             payment.setPatient(patient);
             payment.setTherapyProgram(program);
-            payment.setManagedBy(staffUser); // ✅ ATTACH FULL PERSISTED STAFF DETAILS TO AUDIT PATH
+            payment.setManagedBy(staffUser);
             payment.setStatus(Payment.Status.SUCCESS);
 
             boolean isSaved = paymentDAO.save(payment);

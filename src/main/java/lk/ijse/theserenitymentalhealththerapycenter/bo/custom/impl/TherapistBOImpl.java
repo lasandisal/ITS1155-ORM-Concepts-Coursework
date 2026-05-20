@@ -126,7 +126,6 @@ public class TherapistBOImpl implements TherapistBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Read transaction started to allow 'createQuery' to run safely
             transaction = session.beginTransaction();
 
             List<Therapist> therapists = therapistDAO.findAllActive();
@@ -136,7 +135,7 @@ public class TherapistBOImpl implements TherapistBO {
                 dtoList.add(MappingUtil.toTherapistDTO(therapist));
             }
 
-            transaction.commit(); // ✅ Session auto-closes here
+            transaction.commit();
             return dtoList;
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
@@ -149,12 +148,11 @@ public class TherapistBOImpl implements TherapistBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            // ✅ FIXED: Read transaction started to handle validation queries safely
             transaction = session.beginTransaction();
 
             boolean isAvailable = therapistDAO.isTherapistAvailable(therapistId, dateTime);
 
-            transaction.commit(); // ✅ Session auto-closes here
+            transaction.commit();
             return isAvailable;
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();

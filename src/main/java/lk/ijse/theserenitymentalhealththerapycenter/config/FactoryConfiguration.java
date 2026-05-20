@@ -6,6 +6,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Properties;
+
 public class FactoryConfiguration {
 
     private static FactoryConfiguration factoryConfiguration;
@@ -16,8 +18,7 @@ public class FactoryConfiguration {
         try {
             Configuration configuration = new Configuration();
 
-            // 1. Load your standard properties file
-            java.util.Properties properties = new java.util.Properties();
+            Properties properties = new java.util.Properties();
             var resourceStream = getClass().getResourceAsStream("/hibernate.properties");
             if (resourceStream == null) {
                 throw new java.io.FileNotFoundException("Properties file path not found.");
@@ -25,8 +26,6 @@ public class FactoryConfiguration {
             properties.load(resourceStream);
             configuration.setProperties(properties);
 
-
-            // 3. Add your annotated entity classes
             configuration.addAnnotatedClass(User.class);
             configuration.addAnnotatedClass(Patient.class);
             configuration.addAnnotatedClass(Therapist.class);
@@ -34,7 +33,6 @@ public class FactoryConfiguration {
             configuration.addAnnotatedClass(TherapySession.class);
             configuration.addAnnotatedClass(Payment.class);
 
-            // 4. Build the factory clean
             sessionFactory = configuration.buildSessionFactory();
             seedInitialUsers();
 
@@ -62,7 +60,6 @@ public class FactoryConfiguration {
         try {
             transaction = session.beginTransaction();
 
-            // 1. Validate and Seed Admin Profile
             Long adminCount = (Long) session.createQuery(
                     "SELECT COUNT(u) FROM User u WHERE u.username = 'admin'"
             ).uniqueResult();
@@ -72,17 +69,16 @@ public class FactoryConfiguration {
                 admin.setUsername("admin");
                 admin.setPassword(BCrypt.hashpw("admin123", BCrypt.gensalt()));
                 admin.setFullName("LasandiSal");
-                admin.setEmail("admin@theserenity.com"); // Added to satisfy potential validation rules
+                admin.setEmail("admin@theserenity.com");
                 admin.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.ADMIN);
 
-                // ✅ FIX: Change this to match the exact status property expected by your User entity
+
                 admin.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
 
                 session.persist(admin);
                 System.out.println(">> Database Seeded: Default Admin created! [User: admin | Pass: admin123]");
             }
 
-            // 2. Validate and Seed Receptionist Profile
             Long recepCount = (Long) session.createQuery(
                     "SELECT COUNT(u) FROM User u WHERE u.username = 'receptionist'"
             ).uniqueResult();
@@ -92,10 +88,8 @@ public class FactoryConfiguration {
                 receptionist.setUsername("receptionist");
                 receptionist.setPassword(BCrypt.hashpw("recep123", BCrypt.gensalt()));
                 receptionist.setFullName("SelinErl");
-                receptionist.setEmail("reception@theserenity.com"); // Added to satisfy potential validation rules
+                receptionist.setEmail("reception@theserenity.com");
                 receptionist.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.RECEPTIONIST);
-
-                // ✅ FIX: Match the exact same operational state format here
                 receptionist.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
 
                 session.persist(receptionist);

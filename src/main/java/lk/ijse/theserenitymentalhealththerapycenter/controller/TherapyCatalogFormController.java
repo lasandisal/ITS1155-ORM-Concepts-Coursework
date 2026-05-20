@@ -29,7 +29,7 @@ public class TherapyCatalogFormController {
 
     @FXML private Button btnClear;
     @FXML private Button btnDelete;
-    @FXML private Button btnSave; // Dynamically handles Save/Update states
+    @FXML private Button btnSave;
 
     @FXML private ComboBox<CommonStatus> cmbStatus;
     @FXML private TableColumn<TherapyProgramDTO, String> colDuration;
@@ -165,19 +165,15 @@ public class TherapyCatalogFormController {
     void tblTherapyProgramOnMouseClicked(MouseEvent event) {
         TherapyProgramDTO selectedProgram = tblTherapyProgram.getSelectionModel().getSelectedItem();
         if (selectedProgram != null) {
-            // ID field mapping set to uneditable to enforce key constraints on updates
             txtProgramId.setText(selectedProgram.getId());
             txtProgramId.setEditable(false);
-
             txtProgramName.setText(selectedProgram.getName());
             txtDuration.setText(selectedProgram.getDuration());
             txtFee.setText(String.valueOf(selectedProgram.getFee()));
             cmbStatus.setValue(selectedProgram.getStatus());
-
-            isUpdateState = true; // Flips your existing structural tracking state boolean flag
+            isUpdateState = true;
             btnSave.setText("Update Program");
 
-            // Double-click triggers the modal detail treatment specifications card
             if (event.getClickCount() == 2) {
                 openTherapyProgramDetailCard(selectedProgram);
             }
@@ -188,7 +184,6 @@ public class TherapyCatalogFormController {
     void txtSearchProgramOnKeyReleased(KeyEvent event) {
         String filterQuery = txtSearchProgram.getText().trim().toLowerCase();
 
-        // When user types and hits ENTER, grab top record result and render separate modal card view
         if (event.getCode() == javafx.scene.input.KeyCode.ENTER && !tblTherapyProgram.getItems().isEmpty()) {
             TherapyProgramDTO topMatchedProgram = tblTherapyProgram.getItems().get(0);
             openTherapyProgramDetailCard(topMatchedProgram);
@@ -200,7 +195,6 @@ public class TherapyCatalogFormController {
             return;
         }
 
-        // Clean inline list-filtering logic stream mapping your specific catalog structure
         javafx.collections.ObservableList<TherapyProgramDTO> filteredList = programList.stream()
                 .filter(p -> p.getId().toLowerCase().contains(filterQuery) ||
                         p.getName().toLowerCase().contains(filterQuery))
