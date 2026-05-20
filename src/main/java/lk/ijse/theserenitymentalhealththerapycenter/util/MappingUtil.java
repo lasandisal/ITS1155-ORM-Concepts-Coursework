@@ -20,10 +20,11 @@ public class MappingUtil {
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
-
-        // FIX: Simple direct assignment since the enum types match perfectly now
         user.setRole(dto.getRole());
         user.setStatus(dto.getStatus());
+
+        // ✅ ADDED: Map recovery keyword straight to entity field
+        user.setRecoveryKeyword(dto.getRecoveryKeyword());
 
         return user;
     }
@@ -33,11 +34,12 @@ public class MappingUtil {
         return new UserDTO(
                 entity.getId(),
                 entity.getUsername(),
-                null,
+                null, // Clear out password text for security transfers
                 entity.getFullName(),
                 entity.getEmail(),
-                UserRole.valueOf(entity.getRole().name()),
-                CommonStatus.valueOf(entity.getStatus().name())
+                entity.getRole(),
+                entity.getStatus(),
+                entity.getRecoveryKeyword() // ✅ ADDED: Map keyword directly to constructor parameters list
         );
     }
 
@@ -237,6 +239,13 @@ public class MappingUtil {
             payment.setTherapyProgram(program);
         }
 
+        // ✅ ADDED: Instantiates a stub proxy User reference for Hibernate to match foreign keys
+        if (dto.getUserId() != null) {
+            User user = new User();
+            user.setId(dto.getUserId());
+            payment.setManagedBy(user);
+        }
+
         return payment;
     }
 
@@ -261,6 +270,12 @@ public class MappingUtil {
         if (entity.getTherapyProgram() != null) {
             dto.setProgramId(entity.getTherapyProgram().getId());
             dto.setProgramName(entity.getTherapyProgram().getName());
+        }
+
+        // ✅ ADDED: Maps the record data safely back out for display views
+        if (entity.getManagedBy() != null) {
+            dto.setUserId(entity.getManagedBy().getId());
+            dto.setUsername(entity.getManagedBy().getUsername());
         }
 
         return dto;

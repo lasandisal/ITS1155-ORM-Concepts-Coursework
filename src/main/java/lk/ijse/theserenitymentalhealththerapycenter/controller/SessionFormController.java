@@ -16,6 +16,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.StringConverter; // ✅ Added for dynamic object mapping wrappers
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOType;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.PatientBO;
@@ -44,10 +45,11 @@ public class SessionFormController {
     @FXML private Button btnCancel;
     @FXML private Button btnClear;
 
-    @FXML private ComboBox<Long> cmbPatientId;
-    @FXML private ComboBox<String> cmbProgramId;
+    // ✅ FIXED TYPES: Changed from raw wrappers (Long/String) to hold full rich DTO profiles safely
+    @FXML private ComboBox<PatientDTO> cmbPatientId;
+    @FXML private ComboBox<TherapyProgramDTO> cmbProgramId;
     @FXML private ComboBox<SessionStatus> cmbSessionStatus;
-    @FXML private ComboBox<Long> cmbTherapistId;
+    @FXML private ComboBox<TherapistDTO> cmbTherapistId;
 
     @FXML private TableColumn<TherapySessionDTO, LocalDateTime> colDateTime;
     @FXML private TableColumn<TherapySessionDTO, Long> colId;
@@ -61,18 +63,24 @@ public class SessionFormController {
     @FXML private TextField txtSearchSessions;
     @FXML private TextField txtSessionTime;
 
-    // Core Business Logic Object Dependencies
     private final TherapySessionBO sessionBO = (TherapySessionBO) BOFactory.getInstance().getBO(BOType.THERAPY_SESSION);
     private final PatientBO patientBO = (PatientBO) BOFactory.getInstance().getBO(BOType.PATIENT);
     private final TherapistBO therapistBO = (TherapistBO) BOFactory.getInstance().getBO(BOType.THERAPIST);
     private final TherapyProgramBO programBO = (TherapyProgramBO) BOFactory.getInstance().getBO(BOType.THERAPY_PROGRAM);
 
     private final ObservableList<TherapySessionDTO> sessionList = FXCollections.observableArrayList();
+
+    // In-Memory cache sheets used to easily match targets during row selection mutations
+    private List<PatientDTO> activePatientsCache;
+    private List<TherapistDTO> activeTherapistsCache;
+    private List<TherapyProgramDTO> activeProgramsCache;
+
     private Long selectedSessionId = null;
 
     @FXML
     public void initialize() {
         initializeTableColumns();
+        setupComboBoxConverters(); // ✅ Configures clean readable profile labels
         loadAllChoiceSelectors();
         loadAllScheduledSessions();
     }
@@ -86,17 +94,40 @@ public class SessionFormController {
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
+    // =========================================================================
+    // ✅ TYPE-SAFE STRING CONVERTER MAPPINGS (BEST PRACTICE)
+    // =========================================================================
+    private void setupComboBoxConverters() {
+        // 1. Patient label parsing conversion rule (e.g., "1001 - Lasandi Uvindya")
+        cmbPatientId.setConverter(new StringConverter<>() {
+            @Override public String toString(PatientDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
+            @Override public PatientDTO fromString(String string) { return null; }
+        });
+
+        // 2. Therapist label parsing conversion rule (e.g., "5 - Dr. Fernando")
+        cmbTherapistId.setConverter(new StringConverter<>() {
+            @Override public String toString(TherapistDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
+            @Override public TherapistDTO fromString(String string) { return null; }
+        });
+
+        // 3. Program label parsing conversion rule (e.g., "PROG-CBT - Cognitive Behavioral")
+        cmbProgramId.setConverter(new StringConverter<>() {
+            @Override public String toString(TherapyProgramDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
+            @Override public TherapyProgramDTO fromString(String string) { return null; }
+        });
+    }
+
     private void loadAllChoiceSelectors() {
         try {
-            // Populate target primary combo choice slots
-            List<Long> patients = patientBO.getAllActivePatients().stream().map(PatientDTO::getId).collect(Collectors.toList());
-            cmbPatientId.setItems(FXCollections.observableArrayList(patients));
+            // Load and populate full entity profiles rather than flattening to raw ID numbers
+            activePatientsCache = patientBO.getAllActivePatients();
+            cmbPatientId.setItems(FXCollections.observableArrayList(activePatientsCache));
 
-            List<Long> therapists = therapistBO.getAllActiveTherapists().stream().map(TherapistDTO::getId).collect(Collectors.toList());
-            cmbTherapistId.setItems(FXCollections.observableArrayList(therapists));
+            activeTherapistsCache = therapistBO.getAllActiveTherapists();
+            cmbTherapistId.setItems(FXCollections.observableArrayList(activeTherapistsCache));
 
-            List<String> programs = programBO.getAllActivePrograms().stream().map(TherapyProgramDTO::getId).collect(Collectors.toList());
-            cmbProgramId.setItems(FXCollections.observableArrayList(programs));
+            activeProgramsCache = programBO.getAllActivePrograms();
+            cmbProgramId.setItems(FXCollections.observableArrayList(activeProgramsCache));
 
             cmbSessionStatus.setItems(FXCollections.observableArrayList(SessionStatus.values()));
             cmbSessionStatus.setValue(SessionStatus.SCHEDULED);
@@ -130,14 +161,15 @@ public class SessionFormController {
             LocalTime parsedTime = LocalTime.parse(txtSessionTime.getText().trim(), DateTimeFormatter.ofPattern("HH:mm"));
             resolvedDateTime = LocalDateTime.of(dtSessionDate.getValue(), parsedTime);
         } catch (DateTimeParseException e) {
-            AlertUtil.showWarning("Validation Error", "Invalid Time Pattern", "Please use the strict standard standard 24-hour time notation layout (e.g., 14:30).");
+            AlertUtil.showWarning("Validation Error", "Invalid Time Pattern", "Please use the strict standard 24-hour time notation layout (e.g., 14:30).");
             return;
         }
 
+        // ✅ Extracting structural primary keys straight out of the mapped combo object models
         TherapySessionDTO dto = new TherapySessionDTO();
-        dto.setPatientId(cmbPatientId.getValue());
-        dto.setTherapistId(cmbTherapistId.getValue());
-        dto.setProgramId(cmbProgramId.getValue());
+        dto.setPatientId(cmbPatientId.getValue().getId());
+        dto.setTherapistId(cmbTherapistId.getValue().getId());
+        dto.setProgramId(cmbProgramId.getValue().getId());
         dto.setSessionDateTime(resolvedDateTime);
         dto.setStatus(cmbSessionStatus.getValue());
 
@@ -204,9 +236,27 @@ public class SessionFormController {
         TherapySessionDTO selectedSession = tblSessions.getSelectionModel().getSelectedItem();
         if (selectedSession != null) {
             selectedSessionId = selectedSession.getId();
-            cmbPatientId.setValue(selectedSession.getPatientId());
-            cmbTherapistId.setValue(selectedSession.getTherapistId());
-            cmbProgramId.setValue(selectedSession.getProgramId());
+
+            // ========== ✅ DYNAMIC IN-MEMORY RE-SELECTION HOOKS ==========
+            // Loops cache profiles to select full matching objects inside dropdown trees smoothly
+            if (activePatientsCache != null) {
+                activePatientsCache.stream()
+                        .filter(p -> p.getId().equals(selectedSession.getPatientId()))
+                        .findFirst().ifPresent(cmbPatientId::setValue);
+            }
+
+            if (activeTherapistsCache != null) {
+                activeTherapistsCache.stream()
+                        .filter(t -> t.getId().equals(selectedSession.getTherapistId()))
+                        .findFirst().ifPresent(cmbTherapistId::setValue);
+            }
+
+            if (activeProgramsCache != null) {
+                activeProgramsCache.stream()
+                        .filter(tp -> tp.getId().equals(selectedSession.getProgramId()))
+                        .findFirst().ifPresent(cmbProgramId::setValue);
+            }
+            // =========================================================
 
             dtSessionDate.setValue(selectedSession.getSessionDateTime().toLocalDate());
             txtSessionTime.setText(selectedSession.getSessionDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
@@ -243,7 +293,6 @@ public class SessionFormController {
         tblSessions.setItems(filtered);
     }
 
-    // ✅ ADDED: Native Modal Spawning Engine Block Routing
     private void openSessionDetailCard(TherapySessionDTO session) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/TherapySessionDetailCard.fxml"));
@@ -267,7 +316,6 @@ public class SessionFormController {
         }
     }
 
-    // Action Placeholders for contextual lookups
     @FXML void cmbPatientOnAction(ActionEvent event) {}
     @FXML void cmbProgramOnAction(ActionEvent event) {}
     @FXML void cmbTherapistOnAction(ActionEvent event) {}

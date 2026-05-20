@@ -21,6 +21,13 @@ public class Payment {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    // =========================================================================
+    // AUDIT TRACKING RELATIONSHIP
+    // =========================================================================
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User managedBy;
+
     @ManyToOne
     @JoinColumn(name = "program_id", nullable = false)
     private TherapyProgram therapyProgram;

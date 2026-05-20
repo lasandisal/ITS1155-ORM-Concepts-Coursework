@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class UserDTO {
+
     private Long id;
     private String username;
     private String password;
@@ -17,4 +18,7 @@ public class UserDTO {
     private String email;
     private UserRole role;
     private CommonStatus status;
+
+    // NEW CHANGE
+    private String recoveryKeyword;
 }

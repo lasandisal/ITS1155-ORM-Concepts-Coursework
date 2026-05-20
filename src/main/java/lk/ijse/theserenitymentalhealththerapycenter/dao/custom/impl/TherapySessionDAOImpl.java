@@ -4,7 +4,9 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.BaseDAOImpl;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapySessionDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession;
+import org.hibernate.query.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class TherapySessionDAOImpl extends BaseDAOImpl implements TherapySessionDAO {
@@ -56,5 +58,39 @@ public class TherapySessionDAOImpl extends BaseDAOImpl implements TherapySession
                 "JOIN FETCH s.therapist " +
                 "JOIN FETCH s.therapyProgram";
         return getSession().createQuery(hql, TherapySession.class).list();
+    }
+
+    @Override
+    public boolean hasOverlappingSession(Long therapistId,
+                                         Long patientId,
+                                         LocalDateTime startWindow,
+                                         LocalDateTime endWindow,
+                                         Long excludeSessionId) {
+
+        String hql = "SELECT COUNT(s.id) FROM TherapySession s WHERE " +
+                "(s.therapist.id = :therapistId OR s.patient.id = :patientId) " +
+                "AND s.sessionDateTime > :startWindow " +
+                "AND s.sessionDateTime < :endWindow " +
+                "AND s.status != lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession.Status.CANCELLED";
+
+
+        if (excludeSessionId != null) {
+            hql += " AND s.id != :excludeSessionId";
+        }
+
+        Query<Long> query = getSession().createQuery(hql, Long.class);
+
+        query.setParameter("therapistId", therapistId);
+        query.setParameter("patientId", patientId);
+        query.setParameter("startWindow", startWindow);
+        query.setParameter("endWindow", endWindow);
+
+        if (excludeSessionId != null) {
+            query.setParameter("excludeSessionId", excludeSessionId);
+        }
+
+        Long count = query.uniqueResult();
+
+        return count != null && count > 0;
     }
 }

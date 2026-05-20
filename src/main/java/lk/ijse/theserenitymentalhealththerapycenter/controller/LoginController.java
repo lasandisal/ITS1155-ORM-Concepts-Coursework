@@ -17,6 +17,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.UserBO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
+import lk.ijse.theserenitymentalhealththerapycenter.util.NavigationUtil;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class LoginController {
     @FXML private TextField passwordTextField;
     @FXML private AnchorPane root;
     @FXML private TextField usernameField;
+
 
     @FXML private ComboBox<UserRole> roleComboBox;
 
@@ -117,11 +119,27 @@ public class LoginController {
         }
     }
 
-    @FXML void handleForgotPasswordLink(ActionEvent event) {
-        AlertUtil.showInformation("System Feature", null, "Recovery routine maps dropped.");
+    @FXML
+    void handleForgotPasswordLink(ActionEvent event) {
+        try {
+            // Assuming 'rootLoginPane' is your Login screen's root AnchorPane identifier variable mapping
+            System.out.println(">> Routing Engine: Swapping screen state context to ForgotPasswordForm.fxml...");
+            NavigationUtil.navigateTo(root, "ForgotPasswordForm.fxml");
+        } catch (IOException e) {
+            e.printStackTrace();
+            AlertUtil.showError("Navigation Drop", "View Map Error", "Could not load ForgotPasswordForm.fxml layout template file from path resources.");
+        }
     }
 
-    @FXML void handleRegisterLink(ActionEvent event) {
-        AlertUtil.showInformation("System Feature", null, "Registration canvas mapping links omitted.");
+    @FXML
+    void handleRegisterLink(ActionEvent event) {
+        try {
+            // Assuming 'rootLoginPane' or similar is your Login screen's base container AnchorPane anchor variable link field
+            System.out.println(">> Routing Engine: Mapping view stack context to registration registration...");
+            NavigationUtil.navigateTo(root, "RegisterForm.fxml");
+        } catch (IOException e) {
+            e.printStackTrace();
+            AlertUtil.showError("Navigation Drop", "View Map Error", "Could not locate RegisterForm.fxml configuration.");
+        }
     }
 }

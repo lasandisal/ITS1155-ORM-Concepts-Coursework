@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.Double?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<AnchorPane prefHeight="625.0" prefWidth="1020.0" styleClass="content-canvas" stylesheets="@../css/therapist.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.theserenitymentalhealththerapycenter.controller.OverviewFormController">
+    <children>
+        <VBox spacing="18.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <children>
+
+                <GridPane hgap="12.0" vgap="10.0">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="75.0" prefHeight="80.0" />
+                    </rowConstraints>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;">
+                            <padding><Insets left="12.0" right="12.0" /></padding>
+                            <children>
+                                <VBox alignment="CENTER" minWidth="38.0" prefHeight="38.0" prefWidth="38.0" style="-fx-background-color: #EFF6FF; -fx-background-radius: 6px;">
+                                    <children><FontIcon iconColor="#3B82F6" iconLiteral="fas-users" iconSize="14" /></children>
+                                </VBox>
+                                <VBox alignment="CENTER_LEFT" spacing="1.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #64748B; -fx-font-weight: bold;" text="ACTIVE PATIENTS" />
+                                        <Label fx:id="lblTotalPatients" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" GridPane.columnIndex="1">
+                            <padding><Insets left="12.0" right="12.0" /></padding>
+                            <children>
+                                <VBox alignment="CENTER" minWidth="38.0" prefHeight="38.0" prefWidth="38.0" style="-fx-background-color: #F5F3FF; -fx-background-radius: 6px;">
+                                    <children><FontIcon iconColor="#8B5CF6" iconLiteral="fas-calendar-check" iconSize="14" /></children>
+                                </VBox>
+                                <VBox alignment="CENTER_LEFT" spacing="1.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #64748B; -fx-font-weight: bold;" text="TODAY'S SESSIONS" />
+                                        <Label fx:id="lblTodaySessions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" GridPane.columnIndex="2">
+                            <padding><Insets left="12.0" right="12.0" /></padding>
+                            <children>
+                                <VBox alignment="CENTER" minWidth="38.0" prefHeight="38.0" prefWidth="38.0" style="-fx-background-color: #ECFDF5; -fx-background-radius: 6px;">
+                                    <children><FontIcon iconColor="#10B981" iconLiteral="fas-dollar-sign" iconSize="14" /></children>
+                                </VBox>
+                                <VBox alignment="CENTER_LEFT" spacing="1.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #64748B; -fx-font-weight: bold;" text="MONTHLY REVENUE" />
+                                        <Label fx:id="lblMonthlyRevenue" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="LKR 0.00" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" GridPane.columnIndex="3">
+                            <padding><Insets left="12.0" right="12.0" /></padding>
+                            <children>
+                                <VBox alignment="CENTER" minWidth="38.0" prefHeight="38.0" prefWidth="38.0" style="-fx-background-color: #FFFBEB; -fx-background-radius: 6px;">
+                                    <children><FontIcon iconColor="#F59E0B" iconLiteral="fas-user-md" iconSize="14" /></children>
+                                </VBox>
+                                <VBox alignment="CENTER_LEFT" spacing="1.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #64748B; -fx-font-weight: bold;" text="TOTAL THERAPISTS" />
+                                        <Label fx:id="lblTotalTherapists" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <VBox alignment="CENTER" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" GridPane.columnIndex="4">
+                            <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
+                            <children>
+                                <Button fx:id="btnGenerateReport" maxWidth="Infinity" onAction="#btnGenerateReportOnAction" prefHeight="38.0" style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-cursor: hand;" styleClass="btn-save" text="Generate Report" VBox.vgrow="ALWAYS">
+                                    <graphic>
+                                        <FontIcon iconColor="WHITE" iconLiteral="fas-file-medical-alt" iconSize="12" />
+                                    </graphic>
+                                </Button>
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+
+                <HBox spacing="18.0" VBox.vgrow="ALWAYS">
+                    <children>
+
+                        <VBox spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" HBox.hgrow="ALWAYS">
+                            <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
+                            <children>
+                                <HBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="Clinical Booking &amp; Attendance Volumes" />
+                                                <Label style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;" text="Comparing transaction logs and appointments across clinical programs" />
+                                            </children>
+                                        </VBox>
+                                        <HBox alignment="CENTER" spacing="8.0">
+                                            <children>
+                                                <Button fx:id="btnRefreshCharts" onAction="#btnRefreshChartsOnAction" prefHeight="32.0" prefWidth="35.0" styleClass="btn-clear">
+                                                    <graphic>
+                                                        <FontIcon iconColor="#64748B" iconLiteral="fas-sync-alt" iconSize="12" />
+                                                    </graphic>
+                                                </Button>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+
+                                <BarChart fx:id="barChartSessionVolumes" animated="false" legendSide="BOTTOM" VBox.vgrow="ALWAYS">
+                                    <xAxis>
+                                        <CategoryAxis label="Therapeutic Framework Categories" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Total Confirmed Sessions" side="LEFT" />
+                                    </yAxis>
+                                </BarChart>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-width: 1px;" HBox.hgrow="NEVER">
+                            <padding><Insets bottom="15.0" left="15.0" right="15.0" top="15.0" /></padding>
+                            <children>
+                                <VBox spacing="2.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="Income Stream Contribution Shares" />
+                                        <Label style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;" text="Percentage distribution of gross center revenue" />
+                                    </children>
+                                </VBox>
+                                <PieChart fx:id="pieChartRevenueShare" labelsVisible="true" legendSide="RIGHT" prefWidth="360.0" VBox.vgrow="ALWAYS" />
+                            </children>
+                        </VBox>
+
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -249,3 +249,51 @@
     -fx-background-color: #4F46E5;
     -fx-text-fill: white;
 }
+
+/* =========================================================================
+   Financial Ledger & Audit Status Badges
+   ========================================================================= */
+
+.status-badge-success {
+    -fx-text-fill: #10B981; /* Emerald Green */
+    -fx-font-weight: bold;
+}
+
+.status-badge-danger {
+    -fx-text-fill: #EF4444; /* Crimson Red */
+    -fx-font-weight: bold;
+}
+
+.status-badge-warning {
+    -fx-text-fill: #F59E0B; /* Amber Yellow */
+    -fx-font-weight: bold;
+}
+
+/* =========================================================================
+   Charts
+   ========================================================================= */
+
+/* Reduce font footprints on chart axis labels to avoid clipping */
+.chart-axis-tick-label {
+    -fx-font-size: 9px;
+    -fx-fill: #64748B;
+    -fx-font-weight: bold;
+}
+
+/* Optimize the font text scale for the internal item legends list */
+.chart-legend-item {
+    -fx-font-size: 10px;
+    -fx-fill: #334155;
+}
+
+/* Adjust the data value label font properties appearing inside slice sectors */
+.chart-pie-label {
+    -fx-font-size: 10px;
+    -fx-fill: #1E293B;
+    -fx-font-weight: bold;
+}
+
+/* Fix chart content containers padding margins to reclaim rendering space */
+.chart-content {
+    -fx-padding: 5px;
+}

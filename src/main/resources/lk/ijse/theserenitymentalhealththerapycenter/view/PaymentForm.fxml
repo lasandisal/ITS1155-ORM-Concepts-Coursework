@@ -59,13 +59,16 @@
                         <TableView fx:id="tblPayment" layoutY="0.8" onMouseClicked="#tblPaymentOnMouseClicked" prefHeight="427.0" prefWidth="980.0" styleClass="clinical-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
                             <columns>
                                 <TableColumn fx:id="colSelect" maxWidth="45.0" minWidth="45.0" prefWidth="45.0" resizable="false" text="✔" />
-                                <TableColumn fx:id="colInvoiceNo" prefWidth="100.0" text="Invoice ID" />
-                                <TableColumn fx:id="colPatientName" prefWidth="180.0" text="Patient Profile" />
-                                <TableColumn fx:id="colProgramName" prefWidth="180.0" text="Treatment Program" />
-                                <TableColumn fx:id="colTherapistName" prefWidth="160.0" text="Assigned Specialist" />
-                                <TableColumn fx:id="colDate" prefWidth="110.0" text="Settle Date" />
-                                <TableColumn fx:id="colAmount" prefWidth="110.0" text="Gross Revenue" />
-                                <TableColumn fx:id="colStatus" prefWidth="110.0" text="Payment Status" />
+                                <TableColumn fx:id="colInvoiceNo" prefWidth="90.0" text="Invoice ID" />
+                                <TableColumn fx:id="colPatientName" prefWidth="150.0" text="Patient Profile" />
+                                <TableColumn fx:id="colProgramName" prefWidth="160.0" text="Treatment Program" />
+                                <TableColumn fx:id="colTherapistName" prefWidth="140.0" text="Assigned Specialist" />
+
+                                <TableColumn fx:id="colUser" prefWidth="120.0" text="Processed By" />
+
+                                <TableColumn fx:id="colDate" prefWidth="100.0" text="Settle Date" />
+                                <TableColumn fx:id="colAmount" prefWidth="100.0" text="Gross Revenue" />
+                                <TableColumn fx:id="colStatus" prefWidth="100.0" text="Payment Status" />
                             </columns>
                             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
                         </TableView>
@@ -82,11 +85,13 @@
                         <Button fx:id="btnDeselectAll" onAction="#btnDeselectAllOnAction" prefHeight="38.0" prefWidth="120.0" styleClass="btn-delete" text="Deselect All" />
                         <Button fx:id="btnSelectAll" onAction="#btnSelectAllOnAction" prefHeight="38.0" prefWidth="120.0" styleClass="btn-clear" text="Select Filtered" />
 
-                        <HBox HBox.hgrow="ALWAYS" /> <Button fx:id="btnSendNotification" onAction="#btnSendNotificationOnAction" prefHeight="38.0" prefWidth="250.0" styleClass="btn-save" text="Send Custom Notification">
-                        <graphic>
-                            <FontIcon iconColor="#FFFFFF" iconLiteral="fas-comment-alt" iconSize="13" />
-                        </graphic>
-                    </Button>
+                        <HBox HBox.hgrow="ALWAYS" />
+
+                        <Button fx:id="btnSendNotification" onAction="#btnSendNotificationOnAction" prefHeight="38.0" prefWidth="250.0" styleClass="btn-save" text="Send Custom Notification">
+                            <graphic>
+                                <FontIcon iconColor="#FFFFFF" iconLiteral="fas-comment-alt" iconSize="13" />
+                            </graphic>
+                        </Button>
                     </children>
                 </HBox>
 

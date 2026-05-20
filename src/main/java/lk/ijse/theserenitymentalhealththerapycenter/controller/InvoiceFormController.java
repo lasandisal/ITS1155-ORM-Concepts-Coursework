@@ -14,6 +14,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.TherapyProgramBO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapyProgramDTO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.UserDTO; // ✅ Imported for session tracking
 import lk.ijse.theserenitymentalhealththerapycenter.util.AlertUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.InvoicePrintUtil;
 
@@ -39,13 +40,26 @@ public class InvoiceFormController {
     private List<TherapyProgramDTO> programList;
     private final ObservableList<PaymentDTO> paymentLogList = FXCollections.observableArrayList();
 
+    // =========================================================================
+    // ✅ ACTIVE SESSION USER STORAGE FIELD
+    // =========================================================================
+    private UserDTO authenticatedUser;
+
+    /**
+     * Setter method invoked by your navigation center/DashboardController
+     * to bind the logged-in employee context dynamically.
+     */
+    public void setAuthenticatedUser(UserDTO user) {
+        this.authenticatedUser = user;
+    }
+    // =========================================================================
+
     @FXML
     public void initialize() {
         configureTableColumns();
         loadSelectorData();
         loadLedgerTable();
 
-        // Auto-update price field when a specific therapy framework item is clicked
         cmbProgram.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.intValue() >= 0) {
                 txtAmount.setText(String.valueOf(programList.get(newValue.intValue()).getFee()));
@@ -64,13 +78,13 @@ public class InvoiceFormController {
     private void loadSelectorData() {
         try {
             cmbPatient.getItems().clear();
-            patientList = patientBO.getAllActivePatients(); // Adjust method call to match your exact PatientBO configuration naming rules
+            patientList = patientBO.getAllActivePatients();
             for (PatientDTO p : patientList) {
                 cmbPatient.getItems().add(p.getId() + " - " + p.getName());
             }
 
             cmbProgram.getItems().clear();
-            programList = programBO.getAllActivePrograms(); // Adjust method call to match your exact TherapyProgramBO naming layouts
+            programList = programBO.getAllActivePrograms();
             for (TherapyProgramDTO tp : programList) {
                 cmbProgram.getItems().add(tp.getId() + " - " + tp.getName());
             }
@@ -92,6 +106,12 @@ public class InvoiceFormController {
 
     @FXML
     void btnPayPrintOnAction(ActionEvent event) {
+        // ✅ SAFETY GUARD: Prevent processing if navigation injection was completely skipped
+        if (authenticatedUser == null) {
+            AlertUtil.showError("Security Error", "Session Missing", "Cannot process payment. No active staff session detected.");
+            return;
+        }
+
         int patientIndex = cmbPatient.getSelectionModel().getSelectedIndex();
         int programIndex = cmbProgram.getSelectionModel().getSelectedIndex();
 
@@ -110,17 +130,20 @@ public class InvoiceFormController {
         paymentDTO.setProgramName(selectedProgram.getName());
         paymentDTO.setAmount(selectedProgram.getFee());
 
+        // =========================================================================
+        // ✅ CRITICAL AUDIT LINK INJECTION
+        // =========================================================================
+        // Securely binds the active user's ID to the business payload container
+        paymentDTO.setUserId(authenticatedUser.getId());
+        paymentDTO.setUsername(authenticatedUser.getUsername());
+        // =========================================================================
+
         try {
-            // 1. Persist securely via Hibernate and generate invoice string serial index sequentials
             boolean success = paymentBO.processUpfrontPayment(paymentDTO);
 
             if (success) {
                 AlertUtil.showInformation("Success", "Payment Approved", "Transaction logged successfully. Spawning physical invoice slip...");
-
-                // 2. Pass DTO directly into your updated error-free Jasper print utility thread
                 InvoicePrintUtil.printInvoice(paymentDTO);
-
-                // 3. Clear interfaces and reload ledger rows
                 btnClearOnAction(null);
                 loadLedgerTable();
             }

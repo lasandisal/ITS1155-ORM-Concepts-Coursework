@@ -17,6 +17,9 @@ public class PaymentDTO {
     private String programId;
     private String programName;
 
+    private Long userId;
+    private String username;
+
     private double amount;
     private LocalDate paymentDate;
     private String invoiceNumber;

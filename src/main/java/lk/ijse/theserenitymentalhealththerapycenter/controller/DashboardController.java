@@ -88,37 +88,44 @@ public class DashboardController {
                 btnSessionSchedule.setManaged(true);
                 btnTherapistManage.setManaged(true);
                 btnTherapyCatalog.setManaged(true);
-
+                btnGenerateInvoice.setManaged(false);
                 btnPaymentTracking.setManaged(true);
                 lblFinanceHeader.setManaged(true);
-                lblFinanceHeader.setManaged(true);
+
+
+                setActiveNavigation(btnDashboard);
+                lblViewTitle.setText("Overview Insights Dashboard");
+                loadView("OverviewForm.fxml");
             }
 
             case RECEPTIONIST -> {
                 // ========== VISIBILITY CONFIGURATIONS ==========
-                btnSessionSchedule.setVisible(true);
-                btnGenerateInvoice.setVisible(true);
-                btnPaymentTracking.setVisible(true);
-                lblFinanceHeader.setVisible(true); // Ensured header reveals cleanly
-
                 btnDashboard.setVisible(false);
                 btnTherapistManage.setVisible(false);
                 btnTherapyCatalog.setVisible(false);
 
+                btnSessionSchedule.setVisible(true);
+                btnGenerateInvoice.setVisible(true);
+                btnPaymentTracking.setVisible(true);
+                lblFinanceHeader.setVisible(true);
+
                 // ========== LAYOUT MANAGEMENT CONFIGURATIONS ==========
+                btnDashboard.setManaged(false);
+                btnTherapistManage.setManaged(false);
+                btnTherapyCatalog.setManaged(false);
+
                 btnSessionSchedule.setManaged(true);
                 btnGenerateInvoice.setManaged(true);
                 btnPaymentTracking.setManaged(true);
                 lblFinanceHeader.setManaged(true);
 
-                btnDashboard.setManaged(false);
-                btnTherapistManage.setManaged(false);
-                btnTherapyCatalog.setManaged(false);
+                setActiveNavigation(btnPatientManage);
+                lblViewTitle.setText("Patient Intake & Clinical Registry");
+                loadView("PatientForm.fxml");
             }
 
             default -> {
                 // ========== ABSOLUTE LOCKDOWN FALLBACK MODE ==========
-                // Completely isolates access bounds from unverified context layers
                 btnDashboard.setVisible(false);
                 btnSessionSchedule.setVisible(false);
                 btnTherapistManage.setVisible(false);
@@ -126,6 +133,7 @@ public class DashboardController {
                 btnGenerateInvoice.setVisible(false);
                 btnPaymentTracking.setVisible(false);
                 lblFinanceHeader.setVisible(false);
+                btnPatientManage.setVisible(false);
 
                 btnDashboard.setManaged(false);
                 btnSessionSchedule.setManaged(false);
@@ -134,17 +142,16 @@ public class DashboardController {
                 btnGenerateInvoice.setManaged(false);
                 btnPaymentTracking.setManaged(false);
                 lblFinanceHeader.setManaged(false);
+                btnPatientManage.setManaged(false);
+
+                lblViewTitle.setText("Access Denied - Restricted Profile Context");
+                return;
             }
         }
 
-        // ● Both Roles: Retain unified Read/Write access paths to core Patient Intake Forms natively!
+        // Both verified active roles require ongoing unrestricted access paths to manage client logs!
         btnPatientManage.setVisible(true);
         btnPatientManage.setManaged(true);
-
-        // Render default entry dashboard viewport screen
-        setActiveNavigation(btnPatientManage);
-        lblViewTitle.setText("Patient Intake & Clinical Registry");
-        loadView("PatientForm.fxml");
     }
 
     private void loadView(String fxmlFile) {
@@ -217,7 +224,23 @@ public class DashboardController {
     void handleGenerateInvoice(ActionEvent event) {
         setActiveNavigation(btnGenerateInvoice);
         lblViewTitle.setText("Point Of Sale - Generate Invoice");
-        loadView("InvoiceForm.fxml");
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lk/ijse/theserenitymentalhealththerapycenter/view/InvoiceForm.fxml"));
+            Parent root = loader.load();
+
+            // ✅ Grab the controller instance right after loading the FXML sheet layout bounds
+            InvoiceFormController controller = loader.getController();
+
+            // Inject the user profile tracked inside DashboardController!
+            controller.setAuthenticatedUser(this.authenticatedUser);
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(root);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

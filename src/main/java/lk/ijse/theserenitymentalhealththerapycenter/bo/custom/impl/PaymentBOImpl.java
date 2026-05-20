@@ -7,10 +7,12 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOType;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PatientDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO;
+import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.UserDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapyProgram;
+import lk.ijse.theserenitymentalhealththerapycenter.entity.User;
 import lk.ijse.theserenitymentalhealththerapycenter.exception.PaymentException;
 import lk.ijse.theserenitymentalhealththerapycenter.util.MappingUtil;
 import lk.ijse.theserenitymentalhealththerapycenter.util.ValidationUtil;
@@ -26,9 +28,15 @@ public class PaymentBOImpl implements PaymentBO {
     private final PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOType.PAYMENT);
     private final PatientDAO patientDAO = (PatientDAO) DAOFactory.getInstance().getDAO(DAOType.PATIENT);
     private final TherapyProgramDAO programDAO = (TherapyProgramDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_PROGRAM);
+    private final UserDAO userDAO = (UserDAO) DAOFactory.getInstance().getDAO(DAOType.USER);
 
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
+        // ✅ ADDED VALIDATION: Guarantee audit compliance criteria right away
+        if (dto.getUserId() == null) {
+            throw new PaymentException("Payment Failed: Active handling staff member session must be specified for logging.");
+        }
+
         if (dto.getPatientId() == null || dto.getProgramId() == null) {
             throw new PaymentException("Payment Failed: Target Patient and Therapy Program criteria must be specified.");
         }
@@ -45,6 +53,8 @@ public class PaymentBOImpl implements PaymentBO {
 
             Patient patient = patientDAO.findById(dto.getPatientId());
             TherapyProgram program = programDAO.findById(dto.getProgramId());
+            // ✅ ADDED LOOKUP: Locate the managing user entity in the database session cache
+            User staffUser = userDAO.findById(dto.getUserId());
 
             if (patient == null) {
                 throw new PaymentException("Processing Failure: Target patient profile missing from records.");
@@ -52,14 +62,18 @@ public class PaymentBOImpl implements PaymentBO {
             if (program == null) {
                 throw new PaymentException("Processing Failure: Target therapeutic program missing from catalog.");
             }
+            if (staffUser == null) {
+                throw new PaymentException("Processing Failure: Active staff session account is invalid or deleted.");
+            }
 
             String nextInvoiceNumber = generateNextInvoiceNumber();
-            dto.setInvoiceNumber(nextInvoiceNumber); // Feed back to DTO wrapper immediately for Jasper printing step
+            dto.setInvoiceNumber(nextInvoiceNumber);
             dto.setPaymentDate(LocalDate.now());
 
             Payment payment = MappingUtil.toPaymentEntity(dto);
             payment.setPatient(patient);
             payment.setTherapyProgram(program);
+            payment.setManagedBy(staffUser); // ✅ ATTACH FULL PERSISTED STAFF DETAILS TO AUDIT PATH
             payment.setStatus(Payment.Status.SUCCESS);
 
             boolean isSaved = paymentDAO.save(payment);

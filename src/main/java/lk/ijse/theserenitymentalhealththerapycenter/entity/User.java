@@ -36,4 +36,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private CommonStatus status = CommonStatus.ACTIVE;
+
+    @Column(name = "recovery_keyword", length = 100)
+    private String recoveryKeyword;
 }
