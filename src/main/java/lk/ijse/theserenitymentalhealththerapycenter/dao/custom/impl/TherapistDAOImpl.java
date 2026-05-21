@@ -44,7 +44,10 @@ public class TherapistDAOImpl extends BaseDAOImpl implements TherapistDAO {
 
     @Override
     public List<Therapist> findAllActive() throws Exception {
-        return getSession().createQuery("FROM Therapist WHERE status = 'ACTIVE'", Therapist.class).list();
+        String hql = "FROM Therapist WHERE status = 'ACTIVE'";
+        Query<Therapist> query = getSession().createQuery(hql, Therapist.class);
+        query.setCacheable(true);
+        return query.list();
     }
 
     @Override

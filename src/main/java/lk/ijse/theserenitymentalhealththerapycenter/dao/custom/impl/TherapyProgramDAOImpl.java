@@ -3,6 +3,7 @@ package lk.ijse.theserenitymentalhealththerapycenter.dao.custom.impl;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.BaseDAOImpl;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapyProgram;
+import org.hibernate.query.Query;
 
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class TherapyProgramDAOImpl extends BaseDAOImpl implements TherapyProgram
 
     @Override
     public List<TherapyProgram> findAllActive() throws Exception {
-        return getSession().createQuery("FROM TherapyProgram WHERE status = 'ACTIVE'", TherapyProgram.class).list();
+        String hql = "FROM TherapyProgram WHERE status = 'ACTIVE'";
+        Query<TherapyProgram> query = getSession().createQuery(hql, TherapyProgram.class);
+        query.setCacheable(true);
+        return query.list();
     }
 }
