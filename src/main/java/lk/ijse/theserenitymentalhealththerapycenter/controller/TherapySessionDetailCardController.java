@@ -12,18 +12,20 @@ import java.time.format.DateTimeFormatter;
 public class TherapySessionDetailCardController {
 
     @FXML private Label lblId;
-    @FXML private Label lblPatientName;
+    @FXML private Label lblPatientName; // Retained FX ID name but handles multi-passenger output displays dynamically
     @FXML private Label lblTherapistName;
     @FXML private Label lblProgramName;
     @FXML private Label lblDateTime;
     @FXML private Label lblStatus;
     @FXML private Button btnClose;
 
-
     public void setSessionData(TherapySessionDTO session) {
         if (session != null) {
             lblId.setText(String.valueOf(session.getId()));
-            lblPatientName.setText(session.getPatientName() != null ? session.getPatientName() : "ID: " + session.getPatientId());
+
+            // Refactored to harvest the complete comma-separated list of names out of the upgraded junction DTO
+            lblPatientName.setText(session.getFormattedPatientNames());
+
             lblTherapistName.setText(session.getTherapistName() != null ? session.getTherapistName() : "ID: " + session.getTherapistId());
             lblProgramName.setText(session.getProgramName() != null ? session.getProgramName() : "Code: " + session.getProgramId());
 

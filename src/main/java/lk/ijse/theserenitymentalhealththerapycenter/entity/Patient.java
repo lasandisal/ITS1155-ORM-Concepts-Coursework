@@ -44,10 +44,10 @@ public class Patient {
     private Status status = Status.ACTIVE;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    private List<TherapySession> sessions = new ArrayList<>();
+    private List<Payment> payments = new ArrayList<>();
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    private List<Payment> payments = new ArrayList<>();
+    private List<SessionAttendance> attendanceSessions = new ArrayList<>();
 
     public enum Status {
         ACTIVE, INACTIVE

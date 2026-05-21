@@ -1,13 +1,14 @@
 package lk.ijse.theserenitymentalhealththerapycenter.controller;
 
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -16,7 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.StringConverter; // ✅ Added for dynamic object mapping wrappers
+import javafx.util.StringConverter;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.BOType;
 import lk.ijse.theserenitymentalhealththerapycenter.bo.custom.PatientBO;
@@ -36,7 +37,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SessionFormController {
@@ -45,7 +48,7 @@ public class SessionFormController {
     @FXML private Button btnCancel;
     @FXML private Button btnClear;
 
-    @FXML private ComboBox<PatientDTO> cmbPatientId;
+    @FXML private ListView<PatientDTO> lstPatients;
     @FXML private ComboBox<TherapyProgramDTO> cmbProgramId;
     @FXML private ComboBox<SessionStatus> cmbSessionStatus;
     @FXML private ComboBox<TherapistDTO> cmbTherapistId;
@@ -69,6 +72,9 @@ public class SessionFormController {
 
     private final ObservableList<TherapySessionDTO> sessionList = FXCollections.observableArrayList();
 
+    // Central state tracking map for structural checkbox selection indexes
+    private final Map<Long, SimpleBooleanProperty> patientCheckedStates = new HashMap<>();
+
     private List<PatientDTO> activePatientsCache;
     private List<TherapistDTO> activeTherapistsCache;
     private List<TherapyProgramDTO> activeProgramsCache;
@@ -78,24 +84,40 @@ public class SessionFormController {
     @FXML
     public void initialize() {
         initializeTableColumns();
-        setupComboBoxConverters();
+        setupDisplayCellConverters();
         loadAllChoiceSelectors();
         loadAllScheduledSessions();
     }
 
     private void initializeTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colPatient.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+        colPatient.setCellValueFactory(new PropertyValueFactory<>("formattedPatientNames"));
         colTherapist.setCellValueFactory(new PropertyValueFactory<>("therapistName"));
         colProgram.setCellValueFactory(new PropertyValueFactory<>("programName"));
         colDateTime.setCellValueFactory(new PropertyValueFactory<>("sessionDateTime"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
-    private void setupComboBoxConverters() {
-        cmbPatientId.setConverter(new StringConverter<>() {
+    private void setupDisplayCellConverters() {
+        // Enforce a dynamic CheckBox factory architecture straight onto the ListView container
+        lstPatients.setCellFactory(CheckBoxListCell.forListView(patient -> {
+            if (patient == null) return null;
+            // Map observation keys securely to individual database ID numbers
+            if (!patientCheckedStates.containsKey(patient.getId())) {
+                patientCheckedStates.put(patient.getId(), new SimpleBooleanProperty(false));
+            }
+            return patientCheckedStates.get(patient.getId());
+        }, new StringConverter<>() {
             @Override public String toString(PatientDTO object) { return object == null ? "" : object.getId() + " - " + object.getName(); }
             @Override public PatientDTO fromString(String string) { return null; }
+        }));
+
+        // Disable standard focus tracking rows since operations are entirely checkbox-driven
+        //  Add this to instantly clear selection focus and disable row highlighting:
+        lstPatients.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.intValue() >= 0) {
+                javafx.application.Platform.runLater(() -> lstPatients.getSelectionModel().clearSelection());
+            }
         });
 
         cmbTherapistId.setConverter(new StringConverter<>() {
@@ -111,9 +133,15 @@ public class SessionFormController {
 
     private void loadAllChoiceSelectors() {
         try {
-            // Load and populate full entity profiles rather than flattening to raw ID numbers
             activePatientsCache = patientBO.getAllActivePatients();
-            cmbPatientId.setItems(FXCollections.observableArrayList(activePatientsCache));
+
+            // Clear prior states and populate tracking indicators safely
+            patientCheckedStates.clear();
+            for (PatientDTO patient : activePatientsCache) {
+                patientCheckedStates.put(patient.getId(), new SimpleBooleanProperty(false));
+            }
+
+            lstPatients.setItems(FXCollections.observableArrayList(activePatientsCache));
 
             activeTherapistsCache = therapistBO.getAllActiveTherapists();
             cmbTherapistId.setItems(FXCollections.observableArrayList(activeTherapistsCache));
@@ -142,9 +170,15 @@ public class SessionFormController {
 
     @FXML
     void btnBookOnAction(ActionEvent event) {
-        if (cmbPatientId.getValue() == null || cmbTherapistId.getValue() == null ||
-                cmbProgramId.getValue() == null || dtSessionDate.getValue() == null) {
-            AlertUtil.showWarning("Validation Error", "Missing parameters", "All relational assignment criteria fields are mandatory.");
+        // Harvest all patient profiles whose checked properties are true
+        List<Long> gatheredPatientIds = patientCheckedStates.entrySet().stream()
+                .filter(entry -> entry.getValue().get())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        if (gatheredPatientIds.isEmpty() || cmbTherapistId.getValue() == null ||
+                cmbProgramId.getValue() == null || dtSessionDate.getValue() == null || txtSessionTime.getText().trim().isEmpty()) {
+            AlertUtil.showWarning("Validation Error", "Missing parameters", "All relational assignment criteria fields (including at least one selected patient) are mandatory.");
             return;
         }
 
@@ -158,11 +192,11 @@ public class SessionFormController {
         }
 
         TherapySessionDTO dto = new TherapySessionDTO();
-        dto.setPatientId(cmbPatientId.getValue().getId());
         dto.setTherapistId(cmbTherapistId.getValue().getId());
         dto.setProgramId(cmbProgramId.getValue().getId());
         dto.setSessionDateTime(resolvedDateTime);
         dto.setStatus(cmbSessionStatus.getValue());
+        dto.setPatientIds(gatheredPatientIds);
 
         if (selectedSessionId == null) {
             handleBooking(dto);
@@ -175,7 +209,7 @@ public class SessionFormController {
     private void handleBooking(TherapySessionDTO dto) {
         try {
             if (sessionBO.bookSession(dto)) {
-                AlertUtil.showSuccess("Booking Complete", "Appointment Fixed", "Therapy session locked and assigned successfully.");
+                AlertUtil.showSuccess("Booking Complete", "Appointment Fixed", "Therapy session room locked and multiple patients assigned successfully.");
                 loadAllScheduledSessions();
                 clearFormFields();
             }
@@ -187,7 +221,7 @@ public class SessionFormController {
     private void handleRescheduling(TherapySessionDTO dto) {
         try {
             if (sessionBO.rescheduleSession(dto)) {
-                AlertUtil.showSuccess("Reschedule Complete", "Timestamp Adjusted", "Therapy appointment shifted successfully.");
+                AlertUtil.showSuccess("Reschedule Complete", "Timestamp Adjusted", "Therapy session entry boundaries shifted completely.");
                 loadAllScheduledSessions();
                 clearFormFields();
             }
@@ -203,12 +237,12 @@ public class SessionFormController {
             return;
         }
 
-        boolean confirm = AlertUtil.showConfirmation("Confirm Action", "Appointment Cancellation Pending", "Soft-delete and drop this scheduled clinical slot?");
+        boolean confirm = AlertUtil.showConfirmation("Confirm Action", "Appointment Cancellation Pending", "Soft-delete and drop this single source of truth row entry?");
         if (!confirm) return;
 
         try {
             if (sessionBO.cancelSession(selectedSessionId)) {
-                AlertUtil.showSuccess("Purge Complete", "Session Cancelled", "Appointment entry state switched to CANCELLED status.");
+                AlertUtil.showSuccess("Purge Complete", "Session Cancelled", "Appointment entry and corresponding records updated successfully.");
                 loadAllScheduledSessions();
                 clearFormFields();
             }
@@ -228,10 +262,15 @@ public class SessionFormController {
         if (selectedSession != null) {
             selectedSessionId = selectedSession.getId();
 
-            if (activePatientsCache != null) {
-                activePatientsCache.stream()
-                        .filter(p -> p.getId().equals(selectedSession.getPatientId()))
-                        .findFirst().ifPresent(cmbPatientId::setValue);
+            // Reverse Synchronization: Reset all checkboxes and check only those matching the active session DTO list
+            patientCheckedStates.values().forEach(property -> property.set(false));
+
+            if (selectedSession.getPatientIds() != null) {
+                for (Long id : selectedSession.getPatientIds()) {
+                    if (patientCheckedStates.containsKey(id)) {
+                        patientCheckedStates.get(id).set(true);
+                    }
+                }
             }
 
             if (activeTherapistsCache != null) {
@@ -274,7 +313,7 @@ public class SessionFormController {
         }
 
         ObservableList<TherapySessionDTO> filtered = sessionList.stream()
-                .filter(s -> (s.getPatientName() != null && s.getPatientName().toLowerCase().contains(query)) ||
+                .filter(s -> (s.getFormattedPatientNames() != null && s.getFormattedPatientNames().toLowerCase().contains(query)) ||
                         (s.getTherapistName() != null && s.getTherapistName().toLowerCase().contains(query)))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
@@ -304,13 +343,15 @@ public class SessionFormController {
         }
     }
 
-    @FXML void cmbPatientOnAction(ActionEvent event) {}
     @FXML void cmbProgramOnAction(ActionEvent event) {}
     @FXML void cmbTherapistOnAction(ActionEvent event) {}
 
     private void clearFormFields() {
         selectedSessionId = null;
-        cmbPatientId.setValue(null);
+
+        // Wipe all checked selections out of the global map
+        patientCheckedStates.values().forEach(property -> property.set(false));
+
         cmbTherapistId.setValue(null);
         cmbProgramId.setValue(null);
         dtSessionDate.setValue(null);

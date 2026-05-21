@@ -5,6 +5,9 @@ import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MappingUtil {
 
     // ==========================================
@@ -154,12 +157,6 @@ public class MappingUtil {
             session.setStatus(TherapySession.Status.valueOf(dto.getStatus().name()));
         }
 
-        if (dto.getPatientId() != null) {
-            Patient patient = new Patient();
-            patient.setId(dto.getPatientId());
-            session.setPatient(patient);
-        }
-
         if (dto.getTherapistId() != null) {
             Therapist therapist = new Therapist();
             therapist.setId(dto.getTherapistId());
@@ -172,12 +169,27 @@ public class MappingUtil {
             session.setTherapyProgram(program);
         }
 
+        // Map List<Long> patientIds from DTO to List<SessionAttendance> Entities
+        if (dto.getPatientIds() != null && !dto.getPatientIds().isEmpty()) {
+            List<SessionAttendance> attendances = new ArrayList<>();
+            for (Long patientId : dto.getPatientIds()) {
+                Patient patient = new Patient();
+                patient.setId(patientId);
+
+                SessionAttendance attendance = new SessionAttendance();
+                attendance.setSession(session); // Set back-reference for Hibernate
+                attendance.setPatient(patient);
+                attendances.add(attendance);
+            }
+            session.setAttendances(attendances);
+        }
+
         return session;
     }
 
-    // ==========================================
-    // THERAPY SESSION
-    // ==========================================
+// ==========================================
+// THERAPY SESSION
+// ==========================================
 
     public static TherapySessionDTO toTherapySessionDTO(TherapySession entity) {
         if (entity == null) return null;
@@ -190,11 +202,6 @@ public class MappingUtil {
             dto.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.SessionStatus.valueOf(entity.getStatus().name()));
         }
 
-        if (entity.getPatient() != null) {
-            dto.setPatientId(entity.getPatient().getId());
-            dto.setPatientName(entity.getPatient().getName());
-        }
-
         if (entity.getTherapist() != null) {
             dto.setTherapistId(entity.getTherapist().getId());
             dto.setTherapistName(entity.getTherapist().getName());
@@ -205,9 +212,23 @@ public class MappingUtil {
             dto.setProgramName(entity.getTherapyProgram().getName());
         }
 
+        // Extract patient profiles out of the SessionAttendance bridge table into DTO collections
+        if (entity.getAttendances() != null && !entity.getAttendances().isEmpty()) {
+            List<Long> ids = new ArrayList<>();
+            List<String> names = new ArrayList<>();
+
+            for (SessionAttendance attendance : entity.getAttendances()) {
+                if (attendance.getPatient() != null) {
+                    ids.add(attendance.getPatient().getId());
+                    names.add(attendance.getPatient().getName());
+                }
+            }
+            dto.setPatientIds(ids);
+            dto.setPatientNames(names);
+        }
+
         return dto;
     }
-
     // ==========================================
     // PAYMENT
     // ==========================================
