@@ -69,7 +69,7 @@ public class TherapySession {
     private Status status = Status.SCHEDULED;
 
     // New Bidirectional link to the bridge table
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "session",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SessionAttendance> attendances = new ArrayList<>();
 
     public enum Status { SCHEDULED, COMPLETED, CANCELLED }
