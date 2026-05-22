@@ -37,11 +37,12 @@
 
                 <VBox spacing="15.0" styleClass="form-card">
                     <children>
-                        <GridPane hgap="20.0" vgap="15.0">
+                        <GridPane hgap="15.0" vgap="15.0">
                             <columnConstraints>
-                                <ColumnConstraints percentWidth="33.0" />
-                                <ColumnConstraints percentWidth="33.0" />
-                                <ColumnConstraints percentWidth="34.0" />
+                                <ColumnConstraints percentWidth="25.0" />
+                                <ColumnConstraints percentWidth="25.0" />
+                                <ColumnConstraints percentWidth="25.0" />
+                                <ColumnConstraints percentWidth="25.0" />
                             </columnConstraints>
                             <rowConstraints>
                                 <RowConstraints minHeight="65.0" />
@@ -78,6 +79,18 @@
                                             <children>
                                                 <FontIcon iconColor="#64748B" iconLiteral="fas-dollar-sign" iconSize="14" />
                                                 <TextField fx:id="txtAmount" editable="false" prefHeight="38.0" styleClass="text-field-raw" style="-fx-text-fill: #1E293B; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label styleClass="field-label" text="Current Outstanding Balance" />
+                                        <HBox alignment="CENTER_LEFT" styleClass="input-box" fx:id="boxBalanceContainer" style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E1; -fx-border-radius: 6px;">
+                                            <children>
+                                                <FontIcon fx:id="iconBalanceStatus" iconColor="#64748B" iconLiteral="fas-exclamation-circle" iconSize="14" />
+                                                <TextField fx:id="txtOutstandingBalance" editable="false" prefHeight="38.0" text="LKR 0.00" styleClass="text-field-raw" style="-fx-text-fill: #64748B; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
                                             </children>
                                         </HBox>
                                     </children>

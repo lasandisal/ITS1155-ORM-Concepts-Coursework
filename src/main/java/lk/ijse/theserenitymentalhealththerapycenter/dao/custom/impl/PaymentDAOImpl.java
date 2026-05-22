@@ -5,6 +5,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession;
+import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import java.nio.file.LinkOption;
@@ -64,6 +65,26 @@ public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
         return getSession().createQuery("SELECT p.invoiceNumber FROM Payment p ORDER BY p.id DESC", String.class)
                 .setMaxResults(1)
                 .uniqueResult();
+    }
+
+    @Override
+    public double getTotalPaidAmountByPatient(Session session, Long patientId) throws Exception {
+        String hql = "SELECT COALESCE(SUM(p.amount), 0.0) FROM Payment p " +
+                "WHERE p.patient.id = :pid AND p.status = lk.ijse.theserenitymentalhealththerapycenter.entity.Payment.Status.SUCCESS";
+        return session.createQuery(hql, Double.class)
+                .setParameter("pid", patientId)
+                .getSingleResult();
+    }
+
+    @Override
+    public double getTotalBookedSessionsCostByPatient(Session session, Long patientId) throws Exception {
+        String hql = "SELECT COALESCE(SUM(a.session.therapyProgram.fee), 0.0) " +
+                "FROM SessionAttendance a " +
+                "WHERE a.patient.id = :pid AND a.session.status != 'CANCELLED'";
+
+        return session.createQuery(hql, Double.class)
+                .setParameter("pid", patientId)
+                .getSingleResult();
     }
 
 

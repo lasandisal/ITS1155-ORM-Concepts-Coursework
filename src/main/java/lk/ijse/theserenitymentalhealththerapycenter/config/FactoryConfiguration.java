@@ -1,5 +1,7 @@
 package lk.ijse.theserenitymentalhealththerapycenter.config;
 
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -60,41 +62,34 @@ public class FactoryConfiguration {
         org.hibernate.Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
+            User admin = session.get(User.class, 1L);
 
-            Long adminCount = (Long) session.createQuery(
-                    "SELECT COUNT(u) FROM User u WHERE u.username = 'admin'"
-            ).uniqueResult();
-
-            if (adminCount == 0) {
-                User admin = new User();
+            if (admin == null) {
+                admin = new User();
                 admin.setUsername("admin");
                 admin.setPassword(BCrypt.hashpw("admin123", BCrypt.gensalt()));
                 admin.setFullName("LasandiSal");
                 admin.setEmail("admin@theserenity.com");
-                admin.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.ADMIN);
-
-
-                admin.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
+                admin.setRole(UserRole.ADMIN);
+                admin.setStatus(CommonStatus.ACTIVE);
 
                 session.persist(admin);
-                System.out.println(">> Database Seeded: Default Admin created! [User: admin | Pass: admin123]");
+                System.out.println(">> Database Seeded: Default Admin created at ID 1! [User: admin | Pass: admin123]");
             }
 
-            Long recepCount = (Long) session.createQuery(
-                    "SELECT COUNT(u) FROM User u WHERE u.username = 'receptionist'"
-            ).uniqueResult();
+            User receptionist = session.get(User.class, 2L);
 
-            if (recepCount == 0) {
-                User receptionist = new User();
+            if (receptionist == null) {
+                receptionist = new User();
                 receptionist.setUsername("receptionist");
                 receptionist.setPassword(BCrypt.hashpw("recep123", BCrypt.gensalt()));
                 receptionist.setFullName("SelinErl");
                 receptionist.setEmail("reception@theserenity.com");
-                receptionist.setRole(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.UserRole.RECEPTIONIST);
-                receptionist.setStatus(lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE);
+                receptionist.setRole(UserRole.RECEPTIONIST);
+                receptionist.setStatus(CommonStatus.ACTIVE);
 
                 session.persist(receptionist);
-                System.out.println(">> Database Seeded: Default Receptionist created! [User: receptionist | Pass: recep123]");
+                System.out.println(">> Database Seeded: Default Receptionist created at ID 2! [User: receptionist | Pass: recep123]");
             }
 
             transaction.commit();

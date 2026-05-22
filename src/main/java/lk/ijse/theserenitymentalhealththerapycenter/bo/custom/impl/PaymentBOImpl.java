@@ -158,6 +158,36 @@ public class PaymentBOImpl implements PaymentBO {
         }
     }
 
+    @Override
+    public double calculateOutstandingBalance(Long patientId) throws Exception {
+        if (patientId == null) return 0.0;
+
+        Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+
+            // 1. Fetch total cost of sessions booked via DAO methods
+            double totalBookedCost = paymentDAO.getTotalBookedSessionsCostByPatient(session, patientId);
+
+            // 2. Fetch total sum of successfully cleared transactions via DAO methods
+            double totalPaidAmount = paymentDAO.getTotalPaidAmountByPatient(session, patientId);
+
+            transaction.commit();
+
+            // 3. Mathematical evaluation formula matrix
+            double outstandingBalance = totalBookedCost - totalPaidAmount;
+
+            // Prevent returning negative balances if a client pays ahead
+            return outstandingBalance < 0 ? 0.0 : outstandingBalance;
+
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
+
     // =============================================== Helpers ===============================================
 
     private String generateNextInvoiceNumber() throws Exception {

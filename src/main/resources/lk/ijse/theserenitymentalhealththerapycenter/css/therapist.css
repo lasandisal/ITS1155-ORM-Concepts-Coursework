@@ -297,3 +297,33 @@
 .chart-content {
     -fx-padding: 5px;
 }
+
+/* =========================================================================
+   🔒 SERENITY CLINICAL SYSTEM - ACCOUNT BALANCE RENDERING MODULE
+   ========================================================================= */
+
+/* 🚨 DEBT ALERT STATE: For outstanding balances > 0 */
+.balance-overdue {
+    -fx-background-color: #FEF2F2 !important;
+    -fx-border-color: #FCA5A5 !important;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+.balance-text-overdue {
+    -fx-text-fill: #DC2626 !important;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent !important;
+}
+
+/* 🍏 SETTLED STATE: For clean records / zero balance */
+.balance-settled {
+    -fx-background-color: #F0FDF4 !important;
+    -fx-border-color: #BBF7D0 !important;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+.balance-text-settled {
+    -fx-text-fill: #16A34A !important;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent !important;
+}

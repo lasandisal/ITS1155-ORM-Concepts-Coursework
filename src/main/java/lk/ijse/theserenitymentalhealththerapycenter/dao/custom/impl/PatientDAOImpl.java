@@ -55,9 +55,14 @@ public class PatientDAOImpl extends BaseDAOImpl implements PatientDAO {
 
     @Override
     public List<Patient> searchPatientsByProgram(String programId) throws Exception {
-        String hql = "SELECT DISTINCT s.patient FROM TherapySession s WHERE s.therapyProgram.id = :progId AND s.patient.status = 'ACTIVE'";
+        System.out.println(">> Data Engine: Gathering unique active patient files assigned to program ID: " + programId);
+        String hql = "SELECT DISTINCT a.patient FROM SessionAttendance a " +
+                "WHERE a.session.therapyProgram.id = :progId " +
+                "AND a.patient.status = lk.ijse.theserenitymentalhealththerapycenter.dto.enums.CommonStatus.ACTIVE";
+
         Query<Patient> query = getSession().createQuery(hql, Patient.class);
         query.setParameter("progId", programId);
+
         return query.list();
     }
 

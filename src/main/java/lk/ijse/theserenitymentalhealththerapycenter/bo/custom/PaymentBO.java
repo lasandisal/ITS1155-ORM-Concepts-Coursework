@@ -10,4 +10,5 @@ public interface PaymentBO extends SuperBO {
     PaymentDTO getInvoiceDetails(String invoiceNumber) throws Exception;
     List<PaymentDTO> getFinancialReportByStatus(String status) throws Exception;
     List<PaymentDTO> getAllTransactionsLog() throws Exception;
+    double calculateOutstandingBalance(Long patientId) throws Exception;
 }
