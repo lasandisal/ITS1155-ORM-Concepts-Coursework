@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane prefHeight="500.0" prefWidth="520.0" style="-fx-background-color: #F8FAFC; -fx-background-radius: 12;" stylesheets="@../css/therapist.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.theserenitymentalhealththerapycenter.controller.PaymentDetailCardController">
+<AnchorPane prefHeight="500.0" prefWidth="520.0" style="-fx-background-color: #F8FAFC; -fx-background-radius: 12;" stylesheets="@../css/global.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.theserenitymentalhealththerapycenter.controller.PaymentDetailCardController">
     <children>
         <VBox spacing="16.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>

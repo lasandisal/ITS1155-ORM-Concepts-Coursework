@@ -2,17 +2,14 @@ package lk.ijse.theserenitymentalhealththerapycenter.dao.custom.impl;
 
 import lk.ijse.theserenitymentalhealththerapycenter.dao.BaseDAOImpl;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
-import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
-import lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-import java.nio.file.LinkOption;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
+
     @Override
     public boolean save(Payment entity) throws Exception {
         getSession().persist(entity);
@@ -69,6 +66,7 @@ public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
 
     @Override
     public double getTotalPaidAmountByPatient(Session session, Long patientId) throws Exception {
+        // Use the session context passed down safely from the BO transaction layer context loop
         String hql = "SELECT COALESCE(SUM(p.amount), 0.0) FROM Payment p " +
                 "WHERE p.patient.id = :pid AND p.status = lk.ijse.theserenitymentalhealththerapycenter.entity.Payment.Status.SUCCESS";
         return session.createQuery(hql, Double.class)
@@ -78,6 +76,7 @@ public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
 
     @Override
     public double getTotalBookedSessionsCostByPatient(Session session, Long patientId) throws Exception {
+        // Use the session context passed down safely from the BO transaction layer context loop
         String hql = "SELECT COALESCE(SUM(a.session.therapyProgram.fee), 0.0) " +
                 "FROM SessionAttendance a " +
                 "WHERE a.patient.id = :pid AND a.session.status != 'CANCELLED'";
@@ -87,5 +86,40 @@ public class PaymentDAOImpl extends BaseDAOImpl implements PaymentDAO {
                 .getSingleResult();
     }
 
+    @Override
+    public boolean isSessionPaidForPatient(Long patientId, Long sessionId) {
 
+        String hql = "SELECT COUNT(pay.id) FROM TherapySession ts " +
+                "JOIN ts.therapyProgram tp " +
+                "JOIN tp.payments pay " +
+                "WHERE ts.id = :sessionId " +
+                "AND pay.patient.id = :patientId " +
+                "AND pay.status = lk.ijse.theserenitymentalhealththerapycenter.entity.Payment.Status.SUCCESS";
+
+        Long paymentCount = getSession().createQuery(hql, Long.class)
+                .setParameter("sessionId", sessionId)
+                .setParameter("patientId", patientId)
+                .uniqueResult();
+
+        return paymentCount != null && paymentCount > 0;
+    }
+
+    @Override
+    public List<Object[]> getPatientSessionPaymentStatusLog(Long patientId) {
+
+        String hql = "SELECT ts.id, ts.sessionDateTime, tp.name, " +
+                "(SELECT CASE WHEN COUNT(pay.id) > 0 THEN 'PAID' ELSE 'UNPAID' END " +
+                "FROM Payment pay " +
+                "WHERE pay.patient.id = sa.patient.id " +
+                "AND pay.therapyProgram.id = tp.id " +
+                "AND pay.status = lk.ijse.theserenitymentalhealththerapycenter.entity.Payment.Status.SUCCESS) " +
+                "FROM SessionAttendance sa " +
+                "JOIN sa.session ts " +
+                "JOIN ts.therapyProgram tp " +
+                "WHERE sa.patient.id = :patientId";
+
+        return getSession().createQuery(hql, Object[].class)
+                .setParameter("patientId", patientId)
+                .getResultList();
+    }
 }

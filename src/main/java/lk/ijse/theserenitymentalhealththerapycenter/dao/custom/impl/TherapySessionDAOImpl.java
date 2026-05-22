@@ -67,42 +67,39 @@ public class TherapySessionDAOImpl extends BaseDAOImpl implements TherapySession
         return getSession().createQuery(hql, TherapySession.class).list();
     }
 
-    /**
-     * Individual Program Overlap Validator: Checks if the practitioner is already busy,
-     * OR if this specific patient is already marked present in an alternative active time block.
-     */
+
     @Override
     public boolean hasOverlappingSession(Long therapistId,
                                          Long patientId,
-                                         LocalDateTime startWindow,
-                                         LocalDateTime endWindow,
+                                         LocalDateTime newSessionStart,
                                          Long excludeSessionId) {
 
-        // Rewritten using a LEFT JOIN onto the attendances route to extract matching participant conditions
+        int sessionDurationMinutes = 60;
+        LocalDateTime newSessionEnd = newSessionStart.plusMinutes(sessionDurationMinutes);
+        LocalDateTime overlappingWindowStart = newSessionStart.minusMinutes(sessionDurationMinutes);
+
         String hql = "SELECT COUNT(s.id) FROM TherapySession s " +
                 "LEFT JOIN s.attendances a " +
                 "WHERE (s.therapist.id = :therapistId OR a.patient.id = :patientId) " +
-                "AND s.sessionDateTime > :startWindow " +
-                "AND s.sessionDateTime < :endWindow " +
+                "AND s.sessionDateTime > :overlappingWindowStart " +
+                "AND s.sessionDateTime < :newSessionEnd " +
                 "AND s.status != lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession.Status.CANCELLED";
 
         if (excludeSessionId != null) {
             hql += " AND s.id != :excludeSessionId";
         }
 
-        Query<Long> query = getSession().createQuery(hql, Long.class);
-
-        query.setParameter("therapistId", therapistId);
-        query.setParameter("patientId", patientId);
-        query.setParameter("startWindow", startWindow);
-        query.setParameter("endWindow", endWindow);
+        var query = getSession().createQuery(hql, Long.class)
+                .setParameter("therapistId", therapistId)
+                .setParameter("patientId", patientId)
+                .setParameter("overlappingWindowStart", overlappingWindowStart)
+                .setParameter("newSessionEnd", newSessionEnd);
 
         if (excludeSessionId != null) {
             query.setParameter("excludeSessionId", excludeSessionId);
         }
 
         Long count = query.uniqueResult();
-
         return count != null && count > 0;
     }
 }

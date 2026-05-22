@@ -12,5 +12,8 @@ public interface TherapySessionDAO extends CrudDAO<TherapySession, Long> {
 
     List<Patient> findPatientsEnrolledInAllPrograms() throws Exception;
     List<TherapySession> findAllSessionsWithDetails() throws Exception;
-    public boolean hasOverlappingSession(Long therapistId, Long patientId, LocalDateTime startWindow, LocalDateTime endWindow, Long excludeSessionId);
+    public boolean hasOverlappingSession(Long therapistId,
+                                         Long patientId,
+                                         LocalDateTime newSessionStart,
+                                         Long excludeSessionId);
 }

@@ -6,7 +6,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOFactory;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.DAOType;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PatientDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapistDAO;
-import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO; // ✅ Added for program lookup
+import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapySessionDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.TherapySessionDTO;
@@ -26,15 +26,17 @@ public class TherapySessionBOImpl implements TherapySessionBO {
     private final TherapySessionDAO sessionDAO = (TherapySessionDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_SESSION);
     private final TherapistDAO therapistDAO = (TherapistDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPIST);
     private final PatientDAO patientDAO = (PatientDAO) DAOFactory.getInstance().getDAO(DAOType.PATIENT);
-    private final TherapyProgramDAO programDAO = (TherapyProgramDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_PROGRAM); // ✅ Connected
+    private final TherapyProgramDAO programDAO = (TherapyProgramDAO) DAOFactory.getInstance().getDAO(DAOType.THERAPY_PROGRAM);
 
     private static final LocalTime OPENING_HOUR = LocalTime.of(8, 0);
     private static final LocalTime CLOSING_HOUR = LocalTime.of(18, 0);
-    private static final long SESSION_BUFFER_MINUTES = 60;
-
 
     @Override
     public boolean bookSession(TherapySessionDTO dto) throws Exception {
+        if (dto.getPatientIds() == null || dto.getPatientIds().isEmpty()) {
+            throw new SessionScheduleException("Booking Failed: A session must contain at least one patient registration entry.");
+        }
+
         validateBusinessHours(dto.getSessionDateTime());
 
         Session session = FactoryConfiguration.getInstance().getSession();
@@ -43,8 +45,21 @@ public class TherapySessionBOImpl implements TherapySessionBO {
         try {
             transaction = session.beginTransaction();
 
-            Therapist therapist = therapistDAO.findById(dto.getTherapistId());
             TherapyProgram program = programDAO.findById(dto.getProgramId());
+            if (program == null) {
+                throw new SessionScheduleException("Booking Failed: Target therapeutic program missing.");
+            }
+
+            for (Long patientId : dto.getPatientIds()) {
+                boolean hasOverlap = sessionDAO.hasOverlappingSession(
+                        dto.getTherapistId(), patientId, dto.getSessionDateTime(), null
+                );
+                if (hasOverlap) {
+                    throw new SessionScheduleException("Scheduling Conflict: The selected practitioner or a patient has another appointment scheduled within this 1-hour time frame.");
+                }
+            }
+
+            Therapist therapist = therapistDAO.findById(dto.getTherapistId());
             TherapySession therapySession = new TherapySession();
             therapySession.setTherapist(therapist);
             therapySession.setTherapyProgram(program);
@@ -54,18 +69,14 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             List<SessionAttendance> attendanceList = new ArrayList<>();
             for (Long patientId : dto.getPatientIds()) {
                 Patient patient = patientDAO.findById(patientId);
-
                 SessionAttendance attendance = new SessionAttendance();
                 attendance.setSession(therapySession);
                 attendance.setPatient(patient);
-
                 attendanceList.add(attendance);
             }
-
             therapySession.setAttendances(attendanceList);
 
             boolean isSaved = sessionDAO.save(therapySession);
-
             transaction.commit();
             return isSaved;
 
@@ -93,43 +104,18 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             TherapyProgram program = programDAO.findById(dto.getProgramId());
 
             if (activeSession == null || activeSession.getStatus() == TherapySession.Status.CANCELLED || program == null) {
-                throw new SessionScheduleException("Reschedule Failed: Active appointment record tracking indices missing.");
+                throw new SessionScheduleException("Reschedule Failed: Active appointment record missing.");
             }
-            LocalDateTime requestedTime = dto.getSessionDateTime();
-            LocalDateTime startWindow = requestedTime.minusMinutes(SESSION_BUFFER_MINUTES);
-            LocalDateTime endWindow = requestedTime.plusMinutes(SESSION_BUFFER_MINUTES);
 
-            boolean isGroupProgram = program.getName() != null && program.getName().toLowerCase().contains("group");
-            if (isGroupProgram) {
-                String hql = "SELECT COUNT(s.id) FROM TherapySession s " +
-                        "LEFT JOIN s.attendances a " +
-                        "WHERE (a.patient.id IN (:patientIds) OR (s.therapist.id = :therapistId AND s.therapyProgram.id != :programId)) " +
-                        "AND s.sessionDateTime > :startWindow " +
-                        "AND s.sessionDateTime < :endWindow " +
-                        "AND s.status != lk.ijse.theserenitymentalhealththerapycenter.entity.TherapySession.Status.CANCELLED " +
-                        "AND s.id != :excludeSessionId";
-
-                boolean hasOverlap = session.createQuery(hql, Long.class)
-                        .setParameterList("patientIds", dto.getPatientIds())
-                        .setParameter("therapistId", dto.getTherapistId())
-                        .setParameter("programId", dto.getProgramId())
-                        .setParameter("startWindow", startWindow)
-                        .setParameter("endWindow", endWindow)
-                        .setParameter("excludeSessionId", dto.getId())
-                        .uniqueResult() > 0;
-
-                if (hasOverlap) {
-                    throw new SessionScheduleException("Reschedule Conflict: A selected patient or the practitioner has another active commitment within this adjusted group window.");
-                }
-            } else {
-                Long singlePatientId = dto.getPatientIds().get(0);
+            for (Long patientId : dto.getPatientIds()) {
                 boolean hasOverlap = sessionDAO.hasOverlappingSession(
-                        dto.getTherapistId(), singlePatientId, startWindow, endWindow, dto.getId()
+                        dto.getTherapistId(), patientId, dto.getSessionDateTime(), dto.getId()
                 );
                 if (hasOverlap) {
-                    throw new SessionScheduleException("Reschedule Conflict: The practitioner or patient has another active commitment assigned within this adjusted 1-hour time buffer.");
+                    throw new SessionScheduleException("Reschedule Conflict: The practitioner or an assigned patient has another active commitment scheduled within this 1-hour interval block.");
                 }
             }
+
             activeSession.setSessionDateTime(dto.getSessionDateTime());
             if (dto.getStatus() != null) {
                 activeSession.setStatus(TherapySession.Status.valueOf(dto.getStatus().name()));
@@ -138,18 +124,18 @@ public class TherapySessionBOImpl implements TherapySessionBO {
             Therapist therapist = therapistDAO.findById(dto.getTherapistId());
             activeSession.setTherapist(therapist);
             activeSession.setTherapyProgram(program);
+
             activeSession.getAttendances().clear();
             List<SessionAttendance> updatedAttendances = new ArrayList<>();
             for (Long patientId : dto.getPatientIds()) {
                 Patient patient = patientDAO.findById(patientId);
-
                 SessionAttendance attendance = new SessionAttendance();
                 attendance.setSession(activeSession);
                 attendance.setPatient(patient);
-
                 updatedAttendances.add(attendance);
             }
             activeSession.getAttendances().addAll(updatedAttendances);
+
             boolean isUpdated = sessionDAO.update(activeSession);
             transaction.commit();
             return isUpdated;

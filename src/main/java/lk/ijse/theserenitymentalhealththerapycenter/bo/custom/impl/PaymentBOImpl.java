@@ -8,6 +8,7 @@ import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PatientDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.PaymentDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.TherapyProgramDAO;
 import lk.ijse.theserenitymentalhealththerapycenter.dao.custom.UserDAO;
+import lk.ijse.theserenitymentalhealththerapycenter.dto.PatientSessionStatusDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.dto.PaymentDTO;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Patient;
 import lk.ijse.theserenitymentalhealththerapycenter.entity.Payment;
@@ -20,6 +21,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,39 +35,33 @@ public class PaymentBOImpl implements PaymentBO {
     @Override
     public boolean processUpfrontPayment(PaymentDTO dto) throws Exception {
         if (dto.getUserId() == null) {
-            throw new PaymentException("Payment Failed: Active handling staff member session must be specified for logging.");
+            throw new PaymentException("Payment Failed: Active handling staff member session must be specified.");
         }
-
         if (dto.getPatientId() == null || dto.getProgramId() == null) {
             throw new PaymentException("Payment Failed: Target Patient and Therapy Program criteria must be specified.");
         }
-
         if (dto.getAmount() <= 0) {
-            throw new PaymentException("Payment Failed: The collected ledger processing amount must be greater than zero.");
+            throw new PaymentException("Payment Failed: The processing amount must be greater than zero.");
         }
 
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
 
         try {
-            transaction = session.beginTransaction();
+            // SAFE BOUNDARY: Open transaction context safely if not initialized yet
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
 
             Patient patient = patientDAO.findById(dto.getPatientId());
             TherapyProgram program = programDAO.findById(dto.getProgramId());
             User staffUser = userDAO.findById(dto.getUserId());
 
-            if (patient == null) {
-                throw new PaymentException("Processing Failure: Target patient profile missing from records.");
-            }
-            if (program == null) {
-                throw new PaymentException("Processing Failure: Target therapeutic program missing from catalog.");
-            }
-            if (staffUser == null) {
-                throw new PaymentException("Processing Failure: Active staff session account is invalid or deleted.");
+            if (patient == null || program == null || staffUser == null) {
+                throw new PaymentException("Processing Failure: Associated base profiles are missing from database maps.");
             }
 
-            String nextInvoiceNumber = generateNextInvoiceNumber();
-            dto.setInvoiceNumber(nextInvoiceNumber);
+            dto.setInvoiceNumber(generateNextInvoiceNumber());
             dto.setPaymentDate(LocalDate.now());
 
             Payment payment = MappingUtil.toPaymentEntity(dto);
@@ -76,60 +72,9 @@ public class PaymentBOImpl implements PaymentBO {
 
             boolean isSaved = paymentDAO.save(payment);
 
-            transaction.commit();
+            if (transaction != null) transaction.commit();
             return isSaved;
 
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            throw e;
-        }
-    }
-
-    @Override
-    public PaymentDTO getInvoiceDetails(String invoiceNumber) throws Exception {
-        if (!ValidationUtil.isRequiredFieldFilled(invoiceNumber)) {
-            throw new PaymentException("Lookup Failed: Target validation lookup invoice parameters cannot be blank.");
-        }
-
-        Session session = FactoryConfiguration.getInstance().getSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-
-            Payment payment = paymentDAO.findByInvoiceNumber(invoiceNumber);
-            if (payment == null) {
-                throw new PaymentException("Lookup Failed: Invoice '" + invoiceNumber + "' not found in ledger database.");
-            }
-
-            PaymentDTO dto = MappingUtil.toPaymentDTO(payment);
-            transaction.commit();
-            return dto;
-        } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            throw e;
-        }
-    }
-
-    @Override
-    public List<PaymentDTO> getFinancialReportByStatus(String status) throws Exception {
-        if (!ValidationUtil.isRequiredFieldFilled(status)) {
-            throw new PaymentException("Report Failed: Filtering criterion condition token cannot be empty.");
-        }
-
-        Session session = FactoryConfiguration.getInstance().getSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-
-            List<Payment> payments = paymentDAO.findPaymentsByStatus(status);
-            List<PaymentDTO> dtoList = new ArrayList<>();
-
-            for (Payment p : payments) {
-                dtoList.add(MappingUtil.toPaymentDTO(p));
-            }
-
-            transaction.commit();
-            return dtoList;
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
@@ -141,7 +86,9 @@ public class PaymentBOImpl implements PaymentBO {
         Session session = FactoryConfiguration.getInstance().getSession();
         Transaction transaction = null;
         try {
-            transaction = session.beginTransaction();
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
 
             List<Payment> payments = paymentDAO.findAll();
             List<PaymentDTO> dtoList = new ArrayList<>();
@@ -150,7 +97,7 @@ public class PaymentBOImpl implements PaymentBO {
                 dtoList.add(MappingUtil.toPaymentDTO(p));
             }
 
-            transaction.commit();
+            if (transaction != null) transaction.commit();
             return dtoList;
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
@@ -166,20 +113,16 @@ public class PaymentBOImpl implements PaymentBO {
         Transaction transaction = null;
 
         try {
-            transaction = session.beginTransaction();
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
 
-            // 1. Fetch total cost of sessions booked via DAO methods
             double totalBookedCost = paymentDAO.getTotalBookedSessionsCostByPatient(session, patientId);
-
-            // 2. Fetch total sum of successfully cleared transactions via DAO methods
             double totalPaidAmount = paymentDAO.getTotalPaidAmountByPatient(session, patientId);
 
-            transaction.commit();
+            if (transaction != null) transaction.commit();
 
-            // 3. Mathematical evaluation formula matrix
             double outstandingBalance = totalBookedCost - totalPaidAmount;
-
-            // Prevent returning negative balances if a client pays ahead
             return outstandingBalance < 0 ? 0.0 : outstandingBalance;
 
         } catch (Exception e) {
@@ -188,7 +131,44 @@ public class PaymentBOImpl implements PaymentBO {
         }
     }
 
-    // =============================================== Helpers ===============================================
+    @Override
+    public PaymentDTO getInvoiceDetails(String invoiceNumber) throws Exception {
+        Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
+        try {
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
+            Payment payment = paymentDAO.findByInvoiceNumber(invoiceNumber);
+            PaymentDTO dto = payment != null ? MappingUtil.toPaymentDTO(payment) : null;
+            if (transaction != null) transaction.commit();
+            return dto;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<PaymentDTO> getFinancialReportByStatus(String status) throws Exception {
+        Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
+        try {
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
+            List<Payment> payments = paymentDAO.findPaymentsByStatus(status);
+            List<PaymentDTO> dtoList = new ArrayList<>();
+            for (Payment p : payments) {
+                dtoList.add(MappingUtil.toPaymentDTO(p));
+            }
+            if (transaction != null) transaction.commit();
+            return dtoList;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
 
     private String generateNextInvoiceNumber() throws Exception {
         String lastInvoice = paymentDAO.getLastInvoiceNumber();
@@ -200,8 +180,42 @@ public class PaymentBOImpl implements PaymentBO {
 
         String[] parts = lastInvoice.split("-");
         int lastNumericId = Integer.parseInt(parts[2]);
-        int nextNumericId = lastNumericId + 1;
+        return String.format("INV-%d-%04d", currentYear, lastNumericId + 1);
+    }
 
-        return String.format("INV-%d-%04d", currentYear, nextNumericId);
+    @Override
+    public List<PatientSessionStatusDTO> getPatientSessionPaymentStatusLog(Long patientId) throws Exception {
+        Session session = FactoryConfiguration.getInstance().getSession();
+        Transaction transaction = null;
+        List<PatientSessionStatusDTO> mappedList = new java.util.ArrayList<>();
+
+        try {
+            // Manage transaction boundaries safely using your established context check pattern
+            if (!session.getTransaction().isActive()) {
+                transaction = session.beginTransaction();
+            }
+
+            // 1. Fetch the raw object arrays from your DAO method
+            // (Assuming you placed the method in paymentDAO)
+            List<Object[]> rawRows = paymentDAO.getPatientSessionPaymentStatusLog(patientId);
+
+            // 2. Map the Object[] columns cleanly into your JavaFX-friendly DTOs
+            for (Object[] row : rawRows) {
+                PatientSessionStatusDTO dto = new PatientSessionStatusDTO(
+                        (Long) row[0],                       // ts.id
+                        (LocalDateTime) row[1],              // ts.sessionDateTime
+                        (String) row[2],                     // tp.name
+                        (String) row[3]                      // Calculated 'PAID'/'UNPAID' label
+                );
+                mappedList.add(dto);
+            }
+
+            if (transaction != null) transaction.commit();
+            return mappedList;
+
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
     }
 }

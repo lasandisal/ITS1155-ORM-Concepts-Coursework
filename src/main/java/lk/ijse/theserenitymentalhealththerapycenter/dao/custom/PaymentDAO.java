@@ -15,5 +15,7 @@ public interface PaymentDAO extends CrudDAO<Payment, Long> {
     String getLastInvoiceNumber() throws Exception;
     double getTotalPaidAmountByPatient(Session session, Long patientId) throws Exception;
     double getTotalBookedSessionsCostByPatient(Session session, Long patientId) throws Exception;
+    public boolean isSessionPaidForPatient(Long patientId, Long sessionId);
+    public List<Object[]> getPatientSessionPaymentStatusLog(Long patientId);
 
 }

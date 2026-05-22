@@ -28,14 +28,6 @@ import java.util.stream.Collectors;
 
 public class TherapistFormController {
 
-    private final TherapistBO therapistBO =
-            (TherapistBO) BOFactory.getInstance().getBO(BOType.THERAPIST);
-
-    private final ObservableList<TherapistDTO> therapistList =
-            FXCollections.observableArrayList();
-
-    private TherapistDTO selectedTherapist;
-
     @FXML private Button btnClear;
     @FXML private Button btnDelete;
     @FXML private Button btnSave;
@@ -55,15 +47,20 @@ public class TherapistFormController {
     @FXML private TextField txtSearch;
     @FXML private TextField txtSpecialization;
 
+    private final TherapistBO therapistBO = (TherapistBO) BOFactory.getInstance().getBO(BOType.THERAPIST);
+    private final ObservableList<TherapistDTO> therapistList = FXCollections.observableArrayList();
+    private Long selectedTherapistId = null;
+
     @FXML
     public void initialize() {
-        initializeTable();
+        initializeTableColumns();
         initializeComboBox();
-        loadAllTherapists();
+        loadAllActiveTherapists();
         btnDelete.setDisable(true);
+        btnSave.setText("Save Intake"); // Aligned with Patient layout
     }
 
-    private void initializeTable() {
+    private void initializeTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colSpecialization.setCellValueFactory(new PropertyValueFactory<>("specialization"));
@@ -77,113 +74,108 @@ public class TherapistFormController {
         cmbStatus.setValue(CommonStatus.ACTIVE);
     }
 
-    private void loadAllTherapists() {
+    private void loadAllActiveTherapists() {
         try {
             therapistList.clear();
             List<TherapistDTO> allTherapists = therapistBO.getAllActiveTherapists();
             therapistList.addAll(allTherapists);
             tblTherapist.setItems(therapistList);
         } catch (Exception e) {
-            AlertUtil.showError("Loading Error", "Therapist Loading Failed", e.getMessage());
+            AlertUtil.showError("Database Error", "Registry Load Failure", e.getMessage());
         }
     }
 
     @FXML
     void btnSaveOnAction(ActionEvent event) {
+        if (selectedTherapistId == null) {
+            handleSaveTherapist();
+        } else {
+            handleUpdateTherapist();
+        }
+    }
+
+    private void handleSaveTherapist() {
         try {
-            TherapistDTO dto = new TherapistDTO();
-            dto.setName(txtName.getText().trim());
-            dto.setSpecialization(txtSpecialization.getText().trim());
-            dto.setEmail(txtEmail.getText().trim());
-            dto.setPhone(txtPhone.getText().trim());
-            dto.setStatus(cmbStatus.getValue());
+            TherapistDTO dto = new TherapistDTO(
+                    null,
+                    txtName.getText().trim(),
+                    txtSpecialization.getText().trim(),
+                    txtEmail.getText().trim(),
+                    txtPhone.getText().trim(),
+                    cmbStatus.getValue()
+            );
 
-            boolean result;
-
-            if (selectedTherapist == null) {
-                result = therapistBO.saveTherapist(dto);
-                if (result) {
-                    AlertUtil.showSuccess("Success", null, "Therapist saved successfully.");
-                }
-            } else {
-                dto.setId(selectedTherapist.getId());
-                result = therapistBO.updateTherapist(dto);
-                if (result) {
-                    AlertUtil.showSuccess("Success", null, "Therapist updated successfully.");
-                }
+            if (therapistBO.saveTherapist(dto)) {
+                AlertUtil.showSuccess("Registration Success", "Intake Completed", "New practitioner profile successfully added.");
+                loadAllActiveTherapists();
+                clearFormFields();
             }
-
-            clearForm();
-            loadAllTherapists();
-
         } catch (Exception e) {
-            AlertUtil.showError("Operation Failed", "Therapist Save Failed", e.getMessage());
+            AlertUtil.showWarning("Validation Error", "Invalid Fields", e.getMessage());
+        }
+    }
+
+    private void handleUpdateTherapist() {
+        try {
+            TherapistDTO dto = new TherapistDTO(
+                    selectedTherapistId,
+                    txtName.getText().trim(),
+                    txtSpecialization.getText().trim(),
+                    txtEmail.getText().trim(),
+                    txtPhone.getText().trim(),
+                    cmbStatus.getValue()
+            );
+
+            if (therapistBO.updateTherapist(dto)) {
+                AlertUtil.showSuccess("Profile Modified", "Update Successful", "Therapist information updated successfully.");
+                loadAllActiveTherapists();
+                clearFormFields();
+            }
+        } catch (Exception e) {
+            AlertUtil.showWarning("Update Failure", "Modification Dropped", e.getMessage());
         }
     }
 
     @FXML
     void btnDeleteOnAction(ActionEvent event) {
-        if (selectedTherapist == null) {
-            AlertUtil.showWarning("Selection Required", null, "Please select a therapist first.");
+        if (selectedTherapistId == null) {
+            AlertUtil.showWarning("Selection Error", "No Target Selected", "Please select a therapist from the table.");
             return;
         }
 
-        boolean confirmed = AlertUtil.showConfirmation(
-                "Delete Confirmation",
-                "Delete Therapist",
-                "Are you sure you want to remove this therapist?"
-        );
-
-        if (!confirmed) return;
+        boolean confirmation = AlertUtil.showConfirmation("Confirm Action", "Profile Deactivation Pending", "Soft-delete this practitioner profile?");
+        if (!confirmation) return;
 
         try {
-            boolean result = therapistBO.softDeleteTherapist(selectedTherapist.getId());
-            if (result) {
-                AlertUtil.showSuccess("Deleted", null, "Therapist removed successfully.");
-                clearForm();
-                loadAllTherapists();
+            if (therapistBO.softDeleteTherapist(selectedTherapistId)) {
+                AlertUtil.showSuccess("Profile Purged", "Deactivation Complete", "Therapist profile set to INACTIVE.");
+                loadAllActiveTherapists();
+                clearFormFields();
             }
         } catch (Exception e) {
-            AlertUtil.showError("Delete Failed", "Therapist Delete Error", e.getMessage());
+            AlertUtil.showError("Deletion Error", "Database Drop Failure", e.getMessage());
         }
     }
 
     @FXML
     void btnClearOnAction(ActionEvent event) {
-        clearForm();
-    }
-
-    private void clearForm() {
-        txtName.clear();
-        txtSpecialization.clear();
-        txtEmail.clear();
-        txtPhone.clear();
-        txtSearch.clear();
-
-        cmbStatus.setValue(CommonStatus.ACTIVE);
-        tblTherapist.getSelectionModel().clearSelection();
-
-        selectedTherapist = null;
-        btnSave.setText("Save Therapist");
-        btnDelete.setDisable(true);
+        clearFormFields();
     }
 
     @FXML
     void tblTherapistOnMouseClicked(MouseEvent event) {
-        // ✅ FIXED: Assigned directly to the class level 'selectedTherapist' tracking field variable
-        selectedTherapist = tblTherapist.getSelectionModel().getSelectedItem();
-
+        TherapistDTO selectedTherapist = tblTherapist.getSelectionModel().getSelectedItem();
         if (selectedTherapist != null) {
+            selectedTherapistId = selectedTherapist.getId();
             txtName.setText(selectedTherapist.getName());
             txtSpecialization.setText(selectedTherapist.getSpecialization());
             txtEmail.setText(selectedTherapist.getEmail());
             txtPhone.setText(selectedTherapist.getPhone());
             cmbStatus.setValue(selectedTherapist.getStatus());
 
-            btnSave.setText("Update Therapist");
-            btnDelete.setDisable(false); // Activates delete availability logic block cleanly
+            btnSave.setText("Update Profile"); // Changed label text to match profile update context exactly
+            btnDelete.setDisable(false);
 
-            // Double-click triggers the modal detail profile card
             if (event.getClickCount() == 2) {
                 openTherapistDetailCard(selectedTherapist);
             }
@@ -194,7 +186,6 @@ public class TherapistFormController {
     void txtSearchOnKeyReleased(KeyEvent event) {
         String filterQuery = txtSearch.getText().trim();
 
-        // When user types and hits ENTER, grab top record result and render separate modal card view
         if (event.getCode() == KeyCode.ENTER && !tblTherapist.getItems().isEmpty()) {
             TherapistDTO topMatchedTherapist = tblTherapist.getItems().get(0);
             openTherapistDetailCard(topMatchedTherapist);
@@ -202,12 +193,10 @@ public class TherapistFormController {
         }
 
         if (filterQuery.isEmpty()) {
-            // ✅ FIXED: Corrected reference method target pointer naming profile constraint
-            loadAllTherapists();
+            loadAllActiveTherapists();
             return;
         }
 
-        // Handles dynamic type-ahead in-memory filter matching your UI requirements
         ObservableList<TherapistDTO> filteredList = therapistList.stream()
                 .filter(t -> t.getName().toLowerCase().contains(filterQuery.toLowerCase()) ||
                         t.getSpecialization().toLowerCase().contains(filterQuery.toLowerCase()))
@@ -237,5 +226,18 @@ public class TherapistFormController {
             AlertUtil.showError("System Error", "Modal View Load Failure", "Unable to launch secondary view card layout.");
             e.printStackTrace();
         }
+    }
+
+    private void clearFormFields() {
+        selectedTherapistId = null;
+        txtName.clear();
+        txtSpecialization.clear();
+        txtEmail.clear();
+        txtPhone.clear();
+        txtSearch.clear();
+        cmbStatus.setValue(CommonStatus.ACTIVE);
+        btnSave.setText("Save Intake");
+        btnDelete.setDisable(true);
+        tblTherapist.getSelectionModel().clearSelection();
     }
 }

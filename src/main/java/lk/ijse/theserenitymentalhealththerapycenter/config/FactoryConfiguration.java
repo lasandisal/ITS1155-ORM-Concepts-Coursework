@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.io.FileNotFoundException;
 import java.util.Properties;
 
 public class FactoryConfiguration {
@@ -20,10 +21,10 @@ public class FactoryConfiguration {
         try {
             Configuration configuration = new Configuration();
 
-            Properties properties = new java.util.Properties();
+            Properties properties = new Properties();
             var resourceStream = getClass().getResourceAsStream("/hibernate.properties");
             if (resourceStream == null) {
-                throw new java.io.FileNotFoundException("Properties file path not found.");
+                throw new FileNotFoundException("Properties file path not found.");
             }
             properties.load(resourceStream);
             configuration.setProperties(properties);
